@@ -20,22 +20,27 @@ async function main() {
 	const existing = await prisma.user.findUnique({ where: { email } });
 	if (existing) {
 		console.log("Super admin already exists");
-		return;
+	} else {
+		const hashedPassword = await hash(password, 10);
+		const user = await prisma.user.create({
+			data: {
+				email,
+				firstName,
+				lastName,
+				locale,
+				role: "SUPER_ADMIN",
+				hashedPassword,
+			},
+		});
+		console.log("Created SUPER_ADMIN:", user.email);
 	}
 
-	const hashedPassword = await hash(password, 10);
-	const user = await prisma.user.create({
-		data: {
-			email,
-			firstName,
-			lastName,
-			locale,
-			role: "SUPER_ADMIN",
-			hashedPassword,
-		},
-	});
-
-	console.log("Created SUPER_ADMIN:", user.email);
+	// seed default class types
+	const defaults = ["Music", "Piano", "Violin"];
+	for (const name of defaults) {
+		await prisma.classType.upsert({ where: { name }, update: {}, create: { name } });
+	}
+	console.log("Seeded ClassType defaults");
 }
 
 main()

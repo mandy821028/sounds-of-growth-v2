@@ -29,7 +29,10 @@ export default async function SuperAdminPage() {
 			<ul className="space-y-2">
 				{teachers.map((t: TeacherWithUser) => (
 					<li key={t.id} className="border rounded p-3">
-						<div className="font-medium">{t.user.firstName} {t.user.lastName}</div>
+						<div className="font-medium flex items-center gap-2">
+							<img src={t.user.image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
+							<span>{t.user.firstName} {t.user.lastName}</span>
+						</div>
 						<div className="text-sm text-gray-600">{t.user.email}</div>
 					</li>
 				))}

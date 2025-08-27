@@ -17,6 +17,8 @@ export default function AuthNav({ locale = "en" }: { locale?: "en" | "es" }) {
   return isLoggedIn ? (
     <div className="flex items-center gap-2">
       <Link href="/me" className="text-sm">{labels.dashboard}</Link>
+      <div className="flex items-center gap-2">
+        <img src={data?.user?.image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">{data?.user?.name ?? "Account"}</Button>
@@ -33,6 +35,7 @@ export default function AuthNav({ locale = "en" }: { locale?: "en" | "es" }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
     </div>
   ) : (
     <Link href="/login" className="text-sm">{labels.login}</Link>

@@ -7,6 +7,8 @@ export default function AccountPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [locale, setLocale] = useState<"en" | "es">("en");
+  const [image, setImage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -21,6 +23,8 @@ export default function AccountPage() {
       lang: { en: "Language", es: "Idioma" },
       save: { en: "Save", es: "Guardar" },
       saved: { en: "Saved", es: "Guardado" },
+      photo: { en: "Profile photo", es: "Foto de perfil" },
+      upload: { en: "Upload", es: "Subir" },
     };
     return dict[key][lang];
   }
@@ -35,6 +39,7 @@ export default function AccountPage() {
         setEmail(u.email ?? "");
         setPhone(u.phone ?? "");
         setLocale(u.locale === "es" ? "es" : "en");
+        setImage(u.image ?? null);
       }
     })();
   }, []);
@@ -59,6 +64,26 @@ export default function AccountPage() {
     <div className="max-w-md mx-auto py-8">
       <h1 className="text-2xl font-semibold mb-6">{t("title")}</h1>
       <div className="space-y-3">
+        <div className="flex items-center gap-4">
+          <img src={image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-16 h-16 rounded-full border object-cover" />
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">{t("photo")}</label>
+            <input type="file" accept="image/*" onChange={async (e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              const fd = new FormData();
+              fd.append("file", f);
+              setUploading(true);
+              const res = await fetch("/api/account/profile/image", { method: "POST", body: fd });
+              setUploading(false);
+              if (res.ok) {
+                const data = await res.json();
+                setImage(data.url);
+              }
+            }} />
+            {uploading && <div className="text-xs text-gray-500 mt-1">...</div>}
+          </div>
+        </div>
         <input className="w-full border rounded px-3 py-2" placeholder={t("first")} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <input className="w-full border rounded px-3 py-2" placeholder={t("last")} value={lastName} onChange={(e) => setLastName(e.target.value)} />
         <input className="w-full border rounded px-3 py-2" placeholder="Email" value={email} readOnly />

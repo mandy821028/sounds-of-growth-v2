@@ -36,6 +36,7 @@ model Teacher {
   user      User      @relation(fields: [userId], references: [id])
   userId    String    @unique
   students  Student[]
+  lessons   Lesson[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -50,8 +51,83 @@ model Student {
   address      String?
   lat          Float?
   lng          Float?
+  lessons      Lesson[]
+  cancelRequests LessonCancellationRequest[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model ClassType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lessons   Lesson[]
+}
+
+enum LessonStatus {
+  CREATED
+  CANCELLED
+  COMPLETED
+}
+
+model Lesson {
+  id           String       @id @default(cuid())
+  teacher      Teacher      @relation(fields: [teacherId], references: [id])
+  teacherId    String
+  student      Student      @relation(fields: [studentId], references: [id])
+  studentId    String
+  classType    ClassType    @relation(fields: [classTypeId], references: [id])
+  classTypeId  String
+  startsAtUtc  DateTime
+  durationMin  Int
+  timezone     String
+  recurrence   String?
+  recurrenceEndUtc DateTime?
+  priceUsd     Float
+  address      String?
+  lat          Float?
+  lng          Float?
+  published    Boolean @default(false)
+  status       LessonStatus @default(CREATED)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  cancelRequests LessonCancellationRequest[]
+  exceptions   LessonException[]
+}
+
+enum CancelRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LessonCancellationRequest {
+  id        String  @id @default(cuid())
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  String
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  requestedDateUtc DateTime
+  reason    String?
+  status    CancelRequestStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LessonExceptionType {
+  CANCELLED
+}
+
+model LessonException {
+  id        String  @id @default(cuid())
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  String
+  dateUtc   DateTime
+  type      LessonExceptionType
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

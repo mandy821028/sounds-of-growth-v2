@@ -32,7 +32,11 @@ export default async function TeacherPage() {
 			<ul className="space-y-2">
 				{students.map((s: StudentWithUser) => (
 					<li key={s.id} className="border rounded p-3">
-						<div className="font-medium">{s.user.firstName} {s.user.lastName}</div>
+						<div className="font-medium flex items-center gap-2">
+							<img src={s.user.image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
+							<span>{s.user.firstName} {s.user.lastName}</span>
+							<a className="ml-2 text-sm underline" href={`/teacher/students/${s.id}/edit`}>{locale === 'es' ? 'Editar' : 'Edit'}</a>
+						</div>
 						<div className="text-sm text-gray-600">{s.user.email} · {new Date(s.dateOfBirth).toLocaleDateString()}</div>
 					</li>
 				))}

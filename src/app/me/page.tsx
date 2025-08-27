@@ -15,6 +15,7 @@ export default function MeRedirectPage() {
 				const role = s?.user?.role as "SUPER_ADMIN" | "TEACHER" | "STUDENT" | undefined;
 				if (role === "SUPER_ADMIN") return router.replace("/super-admin");
 				if (role === "TEACHER") return router.replace("/teacher");
+				if (role === "STUDENT") return router.replace("/student");
 				if (s?.user) return router.replace("/");
 				return router.replace("/login?callbackUrl=/me");
 			} catch {
