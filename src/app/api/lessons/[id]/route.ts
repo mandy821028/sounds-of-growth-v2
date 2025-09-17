@@ -6,11 +6,11 @@ import { z } from "zod";
 
 type SessionUser = { id: string; role: "SUPER_ADMIN" | "TEACHER" | "STUDENT"; locale: string };
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: Promise<{ params: { id: string } }>) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as SessionUser | undefined;
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
-  const id = params.id;
+  const { id } = await params;
   const url = new URL(req.url);
   const occ = url.searchParams.get('occ');
   const lesson = await prisma.lesson.findUnique({ where: { id }, include: { student: { include: { user: true } }, teacher: { include: { user: true } }, classType: true, cancelRequests: true } });
@@ -30,6 +30,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json(lesson);
   }
   if (sUser.role === "STUDENT") {
+    // Students can only access published lessons
+    if (!lesson.published) return new NextResponse("Forbidden", { status: 403 });
     const st = await prisma.student.findUnique({ where: { userId: sUser.id } });
     if (!st || st.id !== lesson.studentId) return new NextResponse("Forbidden", { status: 403 });
     if (occ) {
@@ -44,11 +46,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   return new NextResponse("Forbidden", { status: 403 });
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: Promise<{ params: { id: string } }>) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as SessionUser | undefined;
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
-  const id = params.id;
+  const { id } = await params;
   const body = await req.json();
   const parsed = z.object({
     published: z.boolean().optional(),
@@ -85,11 +87,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return NextResponse.json(updated);
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: Promise<{ params: { id: string } }>) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as SessionUser | undefined;
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
-  const id = params.id;
+  const { id } = await params;
   const lesson = await prisma.lesson.findUnique({ where: { id }, include: { teacher: true } });
   if (!lesson) return new NextResponse("Not found", { status: 404 });
   if (sUser?.role === "TEACHER") {

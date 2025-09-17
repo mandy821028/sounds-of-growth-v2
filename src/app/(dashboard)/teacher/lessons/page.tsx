@@ -55,14 +55,14 @@ export default function LessonsListPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Lessons</h1>
-        <Link className="border px-3 py-2 rounded" href="/teacher/lessons/new">New lesson</Link>
+        <h1 className="text-2xl font-semibold">{(document?.cookie||'').includes('locale=es') ? 'Clases' : 'Lessons'}</h1>
+        <Link className="border px-3 py-2 rounded" href="/teacher/lessons/new">{(document?.cookie||'').includes('locale=es') ? 'Nueva clase' : 'New lesson'}</Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
         <select className="border rounded px-2 py-1" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="ALL">All statuses</option>
-          <option value="CREATED">Created</option>
-          <option value="COMPLETED">Completed</option>
+          <option value="ALL">{(document?.cookie||'').includes('locale=es') ? 'Todos los estados' : 'All statuses'}</option>
+          <option value="CREATED">{(document?.cookie||'').includes('locale=es') ? 'Creada' : 'Created'}</option>
+          <option value="COMPLETED">{(document?.cookie||'').includes('locale=es') ? 'Completada' : 'Completed'}</option>
         </select>
         <select className="border rounded px-2 py-1" value={pub} onChange={(e) => setPub(e.target.value)}>
           <option value="ALL">All visibility</option>
@@ -87,9 +87,10 @@ export default function LessonsListPage() {
               <span className={`text-xs px-2 py-1 rounded ${l.published ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{l.published ? "Published" : "Draft"}</span>
             </div>
             <div className="mt-2 flex gap-2">
-              <a className="border px-2 py-1 rounded" href={`/teacher/lessons/${l.id}/edit`}>Edit</a>
-              <button className="border px-2 py-1 rounded" onClick={async () => { if (!confirm('Delete this class and all its occurrences?')) return; await fetch(`/api/lessons/${l.id}`, { method: 'DELETE' }); location.reload(); }}>Delete</button>
-              <button className="border px-2 py-1 rounded" onClick={async () => { await fetch(`/api/lessons/${l.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ published: !l.published }) }); location.reload(); }}>{l.published ? 'Unpublish' : 'Publish'}</button>
+              <a className="border px-2 py-1 rounded" href={`/teacher/lessons/${l.id}/edit`}>{(document?.cookie||'').includes('locale=es') ? 'Editar' : 'Edit'}</a>
+              <button className="border px-2 py-1 rounded" onClick={async () => { if (!confirm((document?.cookie||'').includes('locale=es') ? '¿Eliminar la clase y todas sus ocurrencias?' : 'Delete this class and all its occurrences?')) return; await fetch(`/api/lessons/${l.id}`, { method: 'DELETE' }); location.reload(); }}>{(document?.cookie||'').includes('locale=es') ? 'Eliminar' : 'Delete'}</button>
+              <button className="border px-2 py-1 rounded" onClick={async () => { await fetch(`/api/lessons/${l.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ published: !l.published }) }); location.reload(); }}>{l.published ? ((document?.cookie||'').includes('locale=es') ? 'Despublicar' : 'Unpublish') : ((document?.cookie||'').includes('locale=es') ? 'Publicar' : 'Publish')}</button>
+              <a className="border px-2 py-1 rounded" href={`/teacher/lessons/${l.id}/resources`}>{(document?.cookie||'').includes('locale=es') ? 'Recursos' : 'Resources'}</a>
             </div>
           </li>
         ))}

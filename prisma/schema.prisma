@@ -94,6 +94,7 @@ model Lesson {
   updatedAt    DateTime @updatedAt
   cancelRequests LessonCancellationRequest[]
   exceptions   LessonException[]
+  resources    LessonResource[]
 }
 
 enum CancelRequestStatus {
@@ -128,6 +129,17 @@ model LessonException {
   reason    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model LessonResource {
+  id          String   @id @default(cuid())
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId    String
+  title       String
+  contentHtml String   // stored rich-text HTML
+  links       Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Role {

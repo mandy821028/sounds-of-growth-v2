@@ -11,10 +11,9 @@ export default function AccountPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [lang, setLang] = useState<'en'|'es'>('en');
 
   function t(key: string) {
-    const m = document.cookie.match(/(?:^|; )locale=([^;]+)/);
-    const lang = m?.[1] === "es" ? "es" : "en";
     const dict: Record<string, { en: string; es: string }> = {
       title: { en: "My profile", es: "Mi perfil" },
       first: { en: "First name", es: "Nombre" },
@@ -42,6 +41,19 @@ export default function AccountPage() {
         setImage(u.image ?? null);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const m = document.cookie.match(/(?:^|; )locale=([^;]+)/);
+      setLang(m?.[1] === 'es' ? 'es' : 'en');
+      const onLocale = () => {
+        const mx = document.cookie.match(/(?:^|; )locale=([^;]+)/);
+        setLang(mx?.[1] === 'es' ? 'es' : 'en');
+      };
+      window.addEventListener('locale-change', onLocale);
+      return () => window.removeEventListener('locale-change', onLocale);
+    } catch {}
   }, []);
 
   async function onSave() {
@@ -79,6 +91,7 @@ export default function AccountPage() {
               if (res.ok) {
                 const data = await res.json();
                 setImage(data.url);
+                try { window.dispatchEvent(new CustomEvent('avatar-change', { detail: data.url })); } catch {}
               }
             }} />
             {uploading && <div className="text-xs text-gray-500 mt-1">...</div>}

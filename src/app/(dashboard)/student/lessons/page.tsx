@@ -21,7 +21,7 @@ export default async function StudentLessonsPage() {
   const student = await prisma.student.findUnique({ where: { userId: session.user.id } });
   if (!student) return <div className="p-6">No data</div>;
   const lessons = await prisma.lesson.findMany({
-    where: { studentId: student.id },
+    where: { studentId: student.id, published: true },
     include: { classType: true, teacher: { include: { user: true } } },
     orderBy: { startsAtUtc: "asc" },
   });
@@ -51,6 +51,9 @@ export default async function StudentLessonsPage() {
             <div className="space-y-0.5 text-right">
               <div className="text-sm text-gray-500">{t.time}</div>
               <div className="font-medium">{dtfTime.format(l.startsAtUtc)}</div>
+            </div>
+            <div>
+              <a className="border px-3 py-2 rounded" href={`/student/lessons/${l.id}/resources`}>{locale==='es' ? 'Ver recursos' : 'View resources'}</a>
             </div>
           </div>
         ))}

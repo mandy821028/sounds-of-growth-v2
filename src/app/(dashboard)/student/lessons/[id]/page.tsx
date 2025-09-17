@@ -35,6 +35,9 @@ export default async function StudentLessonDetailPage({ params, searchParams }: 
       <div className="text-sm flex items-center gap-2">{t.teacher}: <img src={lesson.teacher?.user?.image ?? '/avatar-placeholder.svg'} alt="avatar" className="w-6 h-6 rounded-full border object-cover" /> {lesson.teacher?.user?.firstName} {lesson.teacher?.user?.lastName}</div>
       <div className="text-sm">{t.price}: ${ (Number(lesson.priceUsd) || 0).toFixed(2) }</div>
       {lesson.address && <div className="text-sm">{t.location}: {lesson.address}</div>}
+      <div className="mt-4">
+        <a className="border px-3 py-2 rounded" href={`/student/lessons/${lesson.id}/resources`}>{locale==='es'?'Ver recursos':'View resources'}</a>
+      </div>
       {lesson.cancelStatus === 'APPROVED' ? (
         <div className="mt-4 text-sm text-red-600">{locale==='es'?'Este evento fue cancelado y no se puede volver a solicitar.':'This occurrence was cancelled and cannot be requested again.'}</div>
       ) : lesson.cancelStatus === 'PENDING' ? (

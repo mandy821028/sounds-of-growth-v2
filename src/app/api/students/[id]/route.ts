@@ -17,25 +17,27 @@ const schema = z.object({
   dateOfBirth: z.string().optional(),
 });
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: Promise<{ params: { id: string } }>) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as SessionUser | undefined;
   if (!session || sUser?.role !== "TEACHER") return new NextResponse("Forbidden", { status: 403 });
-  const student = await prisma.student.findUnique({ where: { id: params.id }, include: { user: true } });
+  const { id } = await params;
+  const student = await prisma.student.findUnique({ where: { id }, include: { user: true } });
   if (!student) return new NextResponse("Not found", { status: 404 });
   const me = await prisma.teacher.findUnique({ where: { userId: sUser.id } });
   if (!me || me.id !== student.teacherId) return new NextResponse("Forbidden", { status: 403 });
   return NextResponse.json(student);
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: Promise<{ params: { id: string } }>) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as SessionUser | undefined;
   if (!session || sUser?.role !== "TEACHER") return new NextResponse("Forbidden", { status: 403 });
   const body = await req.json();
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json(parsed.error.format(), { status: 400 });
-  const student = await prisma.student.findUnique({ where: { id: params.id }, include: { user: true } });
+  const { id } = await params;
+  const student = await prisma.student.findUnique({ where: { id }, include: { user: true } });
   if (!student) return new NextResponse("Not found", { status: 404 });
   const me = await prisma.teacher.findUnique({ where: { userId: sUser.id } });
   if (!me || me.id !== student.teacherId) return new NextResponse("Forbidden", { status: 403 });

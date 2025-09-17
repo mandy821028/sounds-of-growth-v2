@@ -7,7 +7,7 @@ import { z } from "zod";
 type SessionUser = { id: string; role: "SUPER_ADMIN" | "TEACHER" | "STUDENT"; locale: string };
 
 // Teacher or Super Admin approves/rejects
-export async function PATCH(req: Request, { params }: { params: { requestId: string } }) {
+export async function PATCH(req: Request, { params }: Promise<{ params: { requestId: string } }>) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as SessionUser | undefined;
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
@@ -15,7 +15,8 @@ export async function PATCH(req: Request, { params }: { params: { requestId: str
   const parsed = z.object({ action: z.enum(["APPROVE", "REJECT"]) }).safeParse(body);
   if (!parsed.success) return NextResponse.json(parsed.error.format(), { status: 400 });
 
-  const reqEntity = await prisma.lessonCancellationRequest.findUnique({ where: { id: params.requestId }, include: { lesson: true } });
+  const { requestId } = await params;
+  const reqEntity = await prisma.lessonCancellationRequest.findUnique({ where: { id: requestId }, include: { lesson: true } });
   if (!reqEntity) return new NextResponse("Not found", { status: 404 });
 
   if (sUser.role === "TEACHER") {
@@ -26,7 +27,7 @@ export async function PATCH(req: Request, { params }: { params: { requestId: str
   }
 
   const newStatus = parsed.data.action === "APPROVE" ? "APPROVED" : "REJECTED";
-  const updated = await prisma.lessonCancellationRequest.update({ where: { id: params.requestId }, data: { status: newStatus as any } });
+  const updated = await prisma.lessonCancellationRequest.update({ where: { id: requestId }, data: { status: newStatus as any } });
   // If approved: record a LessonException for the date to visually mark in calendar (not hiding the event)
   if (newStatus === 'APPROVED') {
     await prisma.lessonException.upsert({
