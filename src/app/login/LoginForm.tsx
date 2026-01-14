@@ -2,6 +2,11 @@
 import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/components/ui/toast-provider";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginForm() {
 	const [email, setEmail] = useState("");
@@ -10,23 +15,9 @@ export default function LoginForm() {
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 	const { status } = useSession();
-
-	function getLocale(): "en" | "es" {
-		if (typeof document === "undefined") return "en";
-		const m = document.cookie.match(/(?:^|; )locale=([^;]+)/);
-		return m?.[1] === "es" ? "es" : "en";
-	}
-
-	const t = {
-		title: getLocale() === "es" ? "Ingresar" : "Login",
-		email: "Email",
-		password: getLocale() === "es" ? "Contraseña" : "Password",
-		signIn: getLocale() === "es" ? "Entrar" : "Sign in",
-		loading: getLocale() === "es" ? "Entrando..." : "Signing in...",
-		magic: getLocale() === "es" ? "Entrar con enlace mágico" : "Sign in with magic link",
-		invalid: getLocale() === "es" ? "Credenciales inválidas" : "Invalid credentials",
-		error: getLocale() === "es" ? "Error al iniciar sesión" : "Login error",
-	};
+	const t = useTranslations("login");
+	const tCommon = useTranslations("common");
+	const { show } = useToast();
 
 	useEffect(() => {
 		if (status === "authenticated") {
@@ -37,6 +28,11 @@ export default function LoginForm() {
 	const handleSubmit = useCallback(async () => {
 		try {
 			setError(null);
+			if (!email.trim() || !password) {
+				setError(t("invalid"));
+				show(t("invalid"), "error");
+				return;
+			}
 			setIsLoading(true);
 			const res = await signIn("credentials", {
 				redirect: false,
@@ -46,7 +42,8 @@ export default function LoginForm() {
 			});
 			setIsLoading(false);
 			if (res?.error) {
-				setError(t.invalid);
+				setError(t("invalid"));
+				show(t("invalid"), "error");
 				return;
 			}
 			if (res?.url) {
@@ -56,14 +53,17 @@ export default function LoginForm() {
 					const role = s?.user?.role as string | undefined;
 					const mustChange = Boolean(s?.user?.mustChangePassword);
 					if (mustChange) {
+						show(t("mustChange"), "info");
 						window.location.assign("/account/change-password");
 						return;
 					}
 					if (role === "SUPER_ADMIN") {
+						show(tCommon("success"), "success");
 						window.location.assign("/super-admin");
 						return;
 					}
 					if (role === "TEACHER") {
+						show(tCommon("success"), "success");
 						window.location.assign("/teacher");
 						return;
 					}
@@ -75,41 +75,47 @@ export default function LoginForm() {
 			router.replace("/me");
 		} catch (e) {
 			setIsLoading(false);
-			setError(t.error);
+			setError(t("genericError"));
+			show(t("genericError"), "error");
 		}
 	}, [email, password, router]);
 
 	return (
 		<div className="max-w-md mx-auto py-16">
-			<h1 className="text-2xl font-semibold mb-6">{t.title}</h1>
+			<h1 className="text-2xl font-semibold mb-6">{t("title")}</h1>
 			<div className="space-y-4" onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}>
-				<input
+				<Input
 					type="email"
-					placeholder={t.email}
+					placeholder={t("email")}
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
-					className="w-full border rounded px-3 py-2"
 				/>
-				<input
+				<Input
 					type="password"
-					placeholder={t.password}
+					placeholder={t("password")}
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
-					className="w-full border rounded px-3 py-2"
 				/>
-				<button type="button" onClick={handleSubmit} className="w-full bg-black text-white py-2 rounded disabled:opacity-50" disabled={isLoading}>
-					{isLoading ? t.loading : t.signIn}
-				</button>
+				<Button type="button" onClick={handleSubmit} className="w-full" disabled={isLoading}>
+					{isLoading ? (<span className="inline-flex items-center gap-2"><Spinner /> {tCommon("loading")}</span>) : t("submit")}
+				</Button>
 			</div>
 			{error && <p className="mt-3 text-sm text-red-500">{error}</p>}
 			<div className="mt-6">
-				<button
-					className="w-full border py-2 rounded"
-					onClick={() => signIn("email", { email, callbackUrl: "/me" })}
-					disabled={!email}
+				<Button variant="outline"
+					className="w-full"
+					onClick={async () => {
+						try {
+							await signIn("email", { email, callbackUrl: "/me" });
+							show(tCommon("success"), "success");
+						} catch {
+							show(t("genericError"), "error");
+						}
+					}}
+					disabled={!email || isLoading}
 				>
-					{t.magic}
-				</button>
+					{t("magic")}
+				</Button>
 			</div>
 		</div>
 	);

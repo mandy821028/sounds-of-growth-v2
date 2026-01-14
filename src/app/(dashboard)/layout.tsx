@@ -1,26 +1,22 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import AuthNav from "@/components/auth-nav";
-import LanguageMenu from "@/components/language-menu";
+import LanguageSwitch from "@/components/language-switch";
+import ThemeSwitch from "@/components/theme-switch";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const cookieStore = await cookies();
-    const locale = cookieStore.get("locale")?.value === "es" ? "es" : "en";
-    const t = {
-        language: locale === "es" ? "Idioma" : "Language",
-        en: "English",
-        es: "Español",
-    };
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="border-b relative z-10">
-                <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-                    <Link href="/" className="font-semibold">Sounds of Growth</Link>
+            <header className="border-b border-default relative z-10">
+                <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between bg-gradient-to-b from-[rgba(0,151,178,0.08)] to-transparent rounded-b-lg">
+                    <Link href="/" aria-label="Sounds of Growth" className="flex items-center gap-2">
+                        <img src="/logo_animated.svg" alt="" className="h-14 w-auto p-1" />
+                    </Link>
                     <nav className="flex items-center gap-4">
-                        <AuthNav locale={locale} />
-                        <LanguageMenu locale={locale} />
+                        <AuthNav />
+                        <ThemeSwitch />
+                        <LanguageSwitch />
                     </nav>
                 </div>
             </header>

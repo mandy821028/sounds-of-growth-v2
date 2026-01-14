@@ -1,9 +1,11 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function MeRedirectPage() {
 	const router = useRouter();
+	const tCommon = useTranslations("common");
 
 	useEffect(() => {
 		(async () => {
@@ -24,5 +26,5 @@ export default function MeRedirectPage() {
 		})();
 	}, [router]);
 
-	return <div className="p-8">Redirigiendo…</div>;
+	return <div className="p-8">{tCommon("loading")}</div>;
 }

@@ -1,19 +1,29 @@
 "use client";
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useToast } from '@/components/ui/toast-provider';
 
-export default function RequestCancelButton({ lessonId, occurrenceIso, locale }: { lessonId: string; occurrenceIso: string; locale: 'en'|'es' }) {
+export default function RequestCancelButton({ lessonId, occurrenceIso }: { lessonId: string; occurrenceIso: string }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const label = locale === 'es' ? 'Solicitar cancelación' : 'Request cancellation';
-  const sentLabel = locale === 'es' ? 'Solicitud enviada' : 'Request sent';
+  const t = useTranslations('studentLessons');
+  const tCommon = useTranslations('common');
+  const { show } = useToast();
   return (
     <button className="border px-3 py-2 rounded disabled:opacity-50" disabled={sent || loading} onClick={async () => {
       setLoading(true);
-      const res = await fetch(`/api/lessons/${lessonId}/cancel-requests`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestedDateUtc: occurrenceIso }) });
-      setLoading(false);
-      if (res.ok) setSent(true);
-    }}>{sent ? sentLabel : (loading ? '...' : label)}</button>
+      try {
+        const res = await fetch(`/api/lessons/${lessonId}/cancel-requests`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestedDateUtc: occurrenceIso }) });
+        if (!res.ok) throw new Error();
+        setSent(true);
+        show(tCommon('success'), 'success');
+      } catch {
+        show(tCommon('error'), 'error');
+      } finally {
+        setLoading(false);
+      }
+    }}>{sent ? t('requestSent') : (loading ? '...' : t('cancelRequest'))}</button>
   );
 }
 

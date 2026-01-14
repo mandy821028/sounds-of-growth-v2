@@ -1,5 +1,11 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/components/ui/toast-provider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NewLessonPage() {
   const [students, setStudents] = useState<Array<any>>([]);
@@ -11,6 +17,7 @@ export default function NewLessonPage() {
   const [durationMin, setDurationMin] = useState("30");
   const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
   const [recurring, setRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState<'WEEKLY'|'BIWEEKLY'>('WEEKLY');
   const [recurrenceEnd, setRecurrenceEnd] = useState("");
   const [priceUsd, setPriceUsd] = useState("");
   const [useStudentAddr, setUseStudentAddr] = useState(false);
@@ -18,8 +25,12 @@ export default function NewLessonPage() {
   const [lat, setLat] = useState<number | undefined>();
   const [lng, setLng] = useState<number | undefined>();
   const [published, setPublished] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const lang = useMemo(() => (document.cookie.includes("locale=es") ? "es" : "en"), []);
+  const t = useTranslations("teacherLessons");
+  const tCommon = useTranslations("common");
+  const { show } = useToast();
+  const lang = useMemo(() => (typeof document !== 'undefined' && document.cookie.includes("locale=es") ? "es" : "en"), []);
 
   useEffect(() => {
     (async () => {
@@ -60,10 +71,15 @@ export default function NewLessonPage() {
   async function create() {
     const startsAtUtc = new Date(`${date}T${time}:00`);
     const priceValue = Number(priceUsd);
-    if (Number.isNaN(priceValue) || priceUsd.trim() === "") {
-      alert(lang === "es" ? "Ingresa el precio en USD" : "Enter the price in USD");
+    if (!studentId || !classTypeId || !date || !time) {
+      show(tCommon("error"), "error");
       return;
     }
+    if (Number.isNaN(priceValue) || priceUsd.trim() === "") {
+      show(t("invalidPrice"), "error");
+      return;
+    }
+    setSaving(true);
     const payload: any = {
       studentId,
       classTypeId,
@@ -74,7 +90,7 @@ export default function NewLessonPage() {
       published,
     };
     if (recurring) {
-      payload.recurrence = "WEEKLY";
+      payload.recurrence = recurrenceType;
       payload.recurrenceEndUtc = recurrenceEnd ? new Date(`${recurrenceEnd}T23:59:59`).toISOString() : undefined;
     }
     if (useStudentAddr) {
@@ -90,48 +106,90 @@ export default function NewLessonPage() {
       payload.lng = lng;
     }
 
-    const res = await fetch("/api/lessons", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    if (res.ok) window.location.href = "/teacher/lessons";
+    try {
+      const res = await fetch("/api/lessons", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error();
+      show(tCommon("success"), "success");
+      window.location.href = "/teacher/lessons";
+    } catch {
+      show(tCommon("error"), "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <div className="max-w-2xl mx-auto py-8 space-y-3">
-      <h1 className="text-2xl font-semibold mb-4">{lang === "es" ? "Nueva clase (individual)" : "New lesson (individual)"}</h1>
-      <select className="w-full border rounded px-3 py-2" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
-        <option value="">{lang === "es" ? "Selecciona alumno" : "Select student"}</option>
-        {students.map((s) => <option key={s.id} value={s.id}>{`${s.user.firstName} ${s.user.lastName}`}</option>)}
-      </select>
-      <select className="w-full border rounded px-3 py-2" value={classTypeId} onChange={(e) => setClassTypeId(e.target.value)}>
-        <option value="">{lang === "es" ? "Tipo de clase" : "Class type"}</option>
-        {classTypes.map((ct) => <option key={ct.id} value={ct.id}>{ct.name}</option>)}
-      </select>
+      <h1 className="text-2xl font-semibold mb-4">{t("newTitle")}</h1>
+      <div>
+        <Label htmlFor="student">{t("student")}</Label>
+        <select id="student" className="w-full border rounded px-3 py-2 mt-1" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+          <option value="">{t("selectStudent")}</option>
+          {students.map((s) => <option key={s.id} value={s.id}>{`${s.user.firstName} ${s.user.lastName}`}</option>)}
+        </select>
+      </div>
+      <div>
+        <Label htmlFor="classType">{t("classType")}</Label>
+        <select id="classType" className="w-full border rounded px-3 py-2 mt-1" value={classTypeId} onChange={(e) => setClassTypeId(e.target.value)}>
+          <option value="">{t("selectType")}</option>
+          {classTypes.map((ct) => <option key={ct.id} value={ct.id}>{ct.name}</option>)}
+        </select>
+      </div>
       {/* Inline create ClassType */}
       <InlineAddClassType onCreated={(ct) => { setClassTypes((prev) => [...prev, ct]); setClassTypeId(ct.id); }} />
       <div className="grid grid-cols-2 gap-2">
-        <input className="border rounded px-3 py-2" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        <input className="border rounded px-3 py-2" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+        <div>
+          <Label htmlFor="date">{t("date")}</Label>
+          <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="time">{t("time")}</Label>
+          <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+        </div>
       </div>
-      <select className="w-full border rounded px-3 py-2" value={durationMin} onChange={(e) => setDurationMin(e.target.value)}>
-        <option value="30">30 min</option>
-        <option value="45">45 min</option>
-        <option value="60">1 h</option>
-      </select>
-      <input className="w-full border rounded px-3 py-2" value={timezone} onChange={(e) => setTimezone(e.target.value)} />
+      <div>
+        <Label htmlFor="duration">{t("duration")}</Label>
+        <select id="duration" className="w-full border rounded px-3 py-2 mt-1" value={durationMin} onChange={(e) => setDurationMin(e.target.value)}>
+          <option value="30">30 min</option>
+          <option value="45">45 min</option>
+          <option value="60">1 h</option>
+        </select>
+      </div>
+      <div>
+        <Label htmlFor="timezone">{t("timezone")}</Label>
+        <Input id="timezone" value={timezone} onChange={(e) => setTimezone(e.target.value)} />
+      </div>
       <div className="flex items-center gap-2">
         <input id="rec" type="checkbox" checked={recurring} onChange={(e) => setRecurring(e.target.checked)} />
-        <label htmlFor="rec">{lang === "es" ? "Repetir semanalmente" : "Repeat weekly"}</label>
+        <Label htmlFor="rec">{t("repeat")}</Label>
       </div>
       {recurring && (
-        <input className="w-full border rounded px-3 py-2" type="date" value={recurrenceEnd} onChange={(e) => setRecurrenceEnd(e.target.value)} placeholder={lang === "es" ? "Fin (opcional)" : "End (optional)"} />
+        <>
+          <div>
+            <Label htmlFor="recType">{t("frequency")}</Label>
+            <select id="recType" className="w-full border rounded px-3 py-2 mt-1" value={recurrenceType} onChange={(e)=>setRecurrenceType(e.target.value as any)}>
+              <option value="WEEKLY">{t("weekly")}</option>
+              <option value="BIWEEKLY">{t("biweekly")}</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="recEnd">{t("endOptional")}</Label>
+            <Input id="recEnd" type="date" value={recurrenceEnd} onChange={(e) => setRecurrenceEnd(e.target.value)} />
+          </div>
+        </>
       )}
-      <input className="w-full border rounded px-3 py-2" type="number" min="0" step="0.01" value={priceUsd} onChange={(e) => setPriceUsd(e.target.value)} placeholder={lang === "es" ? "Precio (USD)" : "Price (USD)"} />
+      <div>
+        <Label htmlFor="price">{t("priceUsd")}</Label>
+        <Input id="price" type="number" min="0" step="0.01" value={priceUsd} onChange={(e) => setPriceUsd(e.target.value)} />
+      </div>
       <div className="flex items-center gap-2">
         <input id="useaddr" type="checkbox" checked={useStudentAddr} onChange={(e) => setUseStudentAddr(e.target.checked)} />
-        <label htmlFor="useaddr">{lang === "es" ? "Usar dirección del alumno" : "Use student's address"}</label>
+        <Label htmlFor="useaddr">{t("useStudentAddress")}</Label>
       </div>
       {!useStudentAddr && (
         <div className="relative">
-          <input className="w-full border rounded px-3 py-2" placeholder={lang === "es" ? "Dirección (autocompletar)" : "Address (autocomplete)"} value={address} onChange={(e) => setAddress(e.target.value)} />
+          <Label htmlFor="address">{t("address")}</Label>
+          <Input id="address" placeholder={t("addressAutocomplete")} value={address} onChange={(e) => setAddress(e.target.value)} />
           {preds.length > 0 && (
             <ul className="absolute z-[60] mt-1 w-full bg-white border rounded shadow">
               {preds.map((p) => (
@@ -145,29 +203,40 @@ export default function NewLessonPage() {
       )}
       <div className="flex items-center gap-2">
         <input id="pub" type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
-        <label htmlFor="pub">{lang === "es" ? "Publicar en calendario" : "Publish to calendar"}</label>
+        <Label htmlFor="pub">{t("publishToCalendar")}</Label>
       </div>
-      <button className="w-full bg-black text-white py-2 rounded" onClick={create}>{lang === "es" ? "Crear" : "Create"}</button>
+      <Button className="w-full" disabled={saving} onClick={create}>
+        {saving ? (<span className="inline-flex items-center gap-2"><Spinner /> {tCommon("loading")}</span>) : t("create")}
+      </Button>
     </div>
   );
 }
 
 function InlineAddClassType({ onCreated }: { onCreated: (ct: { id: string; name: string }) => void }) {
   const [name, setName] = useState("");
-  const lang = useMemo(() => (document.cookie.includes("locale=es") ? "es" : "en"), []);
+  const t = useTranslations("teacherLessons");
+  const tCommon = useTranslations("common");
+  const { show } = useToast();
   async function add() {
     if (!name.trim()) return;
-    const res = await fetch("/api/class-types", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name.trim() }) });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/class-types", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name.trim() }) });
+      if (!res.ok) throw new Error();
       const ct = await res.json();
       onCreated(ct);
       setName("");
+      show(tCommon("success"), "success");
+    } catch {
+      show(tCommon("error"), "error");
     }
   }
   return (
-    <div className="flex items-center gap-2">
-      <input className="flex-1 border rounded px-3 py-2" placeholder={lang === 'es' ? 'Nuevo tipo de clase' : 'New class type'} value={name} onChange={(e) => setName(e.target.value)} />
-      <button className="border px-3 py-2 rounded" type="button" onClick={add}>{lang === 'es' ? 'Añadir' : 'Add'}</button>
+    <div>
+      <Label htmlFor="newClassType">{t("newClassType")}</Label>
+      <div className="flex items-center gap-2">
+        <Input id="newClassType" className="flex-1" placeholder={t("newClassType")} value={name} onChange={(e) => setName(e.target.value)} />
+        <Button variant="outline" type="button" onClick={add}>{t("add")}</Button>
+      </div>
     </div>
   );
 }

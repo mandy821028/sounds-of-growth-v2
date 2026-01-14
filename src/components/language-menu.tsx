@@ -2,16 +2,13 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 
-export default function LanguageMenu({ locale }: { locale: "en" | "es" }) {
+export default function LanguageMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const t = {
-    language: locale === "es" ? "Idioma" : "Language",
-    en: "English",
-    es: "Español",
-  };
+  const t = useTranslations("common");
 
   function setLanguage(lang: "en" | "es") {
     // Set cookie on client
@@ -30,18 +27,17 @@ export default function LanguageMenu({ locale }: { locale: "en" | "es" }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">{t.language}</Button>
+        <Button variant="outline" size="sm">{t("language")}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setLanguage("en"); }}>
-          {t.en}
+          {t("english")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setLanguage("es"); }}>
-          {t.es}
+          {t("spanish")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-
 

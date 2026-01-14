@@ -42,8 +42,9 @@ export default function CalendarPage() {
         const start = new Date(cursor);
         rangeStart = new Date(start.getFullYear(), start.getMonth(), 1);
         rangeEnd = new Date(start.getFullYear(), start.getMonth()+1, 0);
-        rangeStart.setDate(rangeStart.getDate() - 7);
-        rangeEnd.setDate(rangeEnd.getDate() + 7);
+        // Fetch an even wider buffer so biweekly events across boundaries are guaranteed to load
+        rangeStart.setDate(rangeStart.getDate() - 28);
+        rangeEnd.setDate(rangeEnd.getDate() + 28);
       } else if (view === 'week') {
         rangeStart = startOfWeek(cursor);
         rangeEnd = addDays(rangeStart, 6);
@@ -80,14 +81,14 @@ export default function CalendarPage() {
           const k = fmtLocalYMD(d);
           const list = eventsByDate[k] || [];
           return (
-            <div key={k} className={`border rounded min-h-[100px] p-2 ${isSameMonth(d)?'bg-white':'bg-gray-50'}`}>
+            <div key={k} className={`border border-default rounded min-h-[100px] p-2 ${isSameMonth(d)?'bg-card':'bg-secondary'}`}>
               <div className="text-xs font-medium flex items-center justify-between">
                 <span>{d.getDate()}</span>
                 <button className="text-[10px] underline" onClick={()=>{ setView('day'); setCursor(d); }}>{lang==='es'? 'Día': 'Day'}</button>
               </div>
               <div className="mt-1 space-y-1">
                 {list.slice(0,3).map((e)=>{
-                  const borderCls = e.cancelStatus==='APPROVED'?'border-red-300': e.cancelStatus==='PENDING'?'border-amber-300': e.cancelStatus==='REJECTED'?'border-green-300':'border-gray-200';
+                  const borderCls = e.cancelStatus==='APPROVED'?'border-red-300': e.cancelStatus==='PENDING'?'border-amber-300': e.cancelStatus==='REJECTED'?'border-green-300':'border-default';
                   return (
                     <a
                       key={`${e.id}-${e.occurrence}`}
@@ -121,12 +122,12 @@ export default function CalendarPage() {
             const k = fmtLocalYMD(d);
             const list = eventsByDate[k]||[];
             return (
-              <div key={k} className="border rounded p-2 min-h-[120px]">
+          <div key={k} className="border border-default rounded p-2 min-h-[120px]">
                 <div className="text-xs font-medium mb-1">{d.getDate()}</div>
                 {list.length===0 && <div className="text-[11px] text-gray-400">{lang==='es'? 'Sin eventos': 'No events'}</div>}
                 <ul className="space-y-1">
                   {list.map((e)=>{
-                    const borderCls = e.cancelStatus==='APPROVED'?'border-red-300': e.cancelStatus==='PENDING'?'border-amber-300': e.cancelStatus==='REJECTED'?'border-green-300':'border-gray-200';
+                    const borderCls = e.cancelStatus==='APPROVED'?'border-red-300': e.cancelStatus==='PENDING'?'border-amber-300': e.cancelStatus==='REJECTED'?'border-green-300':'border-default';
                     return (
                       <li key={`${e.id}-${e.occurrence}`} className={`border ${borderCls} rounded px-1 py-0.5 text-[11px] ${e.cancelStatus?'opacity-60':''}`}>
                         <a href={role === 'STUDENT' ? `/student/lessons/${e.id}?occ=${encodeURIComponent(e.occurrence)}` : `/teacher/lessons/${e.id}?occ=${encodeURIComponent(e.occurrence)}`} className="inline-flex items-center gap-1">
@@ -158,7 +159,7 @@ export default function CalendarPage() {
     return (
       <div>
         <div className="mb-3 text-sm text-gray-600">{new Intl.DateTimeFormat(locale,{dateStyle:'full'}).format(cursor)}</div>
-        <div className="border rounded divide-y">
+        <div className="border border-default rounded divide-y">
           {slots.map((s)=> (
             <div key={s.h} className="p-2">
               <div className="text-xs text-gray-500 mb-1">{String(s.h).padStart(2,'0')}:00</div>
@@ -167,7 +168,7 @@ export default function CalendarPage() {
               ) : (
                 <ul className="space-y-1">
                   {s.items.map((e)=>{
-                    const borderCls = e.cancelStatus==='APPROVED'?'border-red-300': e.cancelStatus==='PENDING'?'border-amber-300': e.cancelStatus==='REJECTED'?'border-green-300':'border-gray-200';
+                    const borderCls = e.cancelStatus==='APPROVED'?'border-red-300': e.cancelStatus==='PENDING'?'border-amber-300': e.cancelStatus==='REJECTED'?'border-green-300':'border-default';
                     return (
                       <li key={`${e.id}-${e.occurrence}`} className={`border ${borderCls} rounded px-2 py-1 text-[12px] ${e.cancelStatus?'opacity-60':''}`}>
                         <a href={role === 'STUDENT' ? `/student/lessons/${e.id}?occ=${encodeURIComponent(e.occurrence)}` : `/teacher/lessons/${e.id}?occ=${encodeURIComponent(e.occurrence)}`} className="inline-flex items-center gap-1">
@@ -197,10 +198,10 @@ export default function CalendarPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button className="border px-2 py-1 rounded" onClick={()=>setCursor(addDays(cursor, - (view==='day'?1: view==='week'?7:30)))}>◀</button>
-          <button className="border px-2 py-1 rounded" onClick={()=>setCursor(startOfDay(new Date()))}>{lang==='es'?'Hoy':'Today'}</button>
-          <button className="border px-2 py-1 rounded" onClick={()=>setCursor(addDays(cursor, (view==='day'?1: view==='week'?7:30)))}>▶</button>
-          <select className="border rounded px-2 py-1" value={view} onChange={(e)=>setView(e.target.value as any)}>
+          <button className="border border-default px-2 py-1 rounded hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-ring/50" onClick={()=>setCursor(addDays(cursor, - (view==='day'?1: view==='week'?7:30)))}>◀</button>
+          <button className="border border-default px-2 py-1 rounded hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-ring/50" onClick={()=>setCursor(startOfDay(new Date()))}>{lang==='es'?'Hoy':'Today'}</button>
+          <button className="border border-default px-2 py-1 rounded hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-ring/50" onClick={()=>setCursor(addDays(cursor, (view==='day'?1: view==='week'?7:30)))}>▶</button>
+          <select className="border border-default rounded px-2 py-1 focus-visible:ring-2 focus-visible:ring-ring/50 bg-card" value={view} onChange={(e)=>setView(e.target.value as any)}>
             <option value="month">{lang==='es'?'Mes':'Month'}</option>
             <option value="week">{lang==='es'?'Semana':'Week'}</option>
             <option value="day">{lang==='es'?'Día':'Day'}</option>

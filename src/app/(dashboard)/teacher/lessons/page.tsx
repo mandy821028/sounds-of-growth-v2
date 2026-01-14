@@ -1,6 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/components/ui/toast-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 type LessonListItem = {
   id: string;
@@ -10,6 +15,7 @@ type LessonListItem = {
   status: string;
   classType?: { name: string } | null;
   student?: { user?: { firstName?: string; lastName?: string; image?: string } | null } | null;
+  recurrence?: "WEEKLY" | "BIWEEKLY" | null;
 };
 
 export default function LessonsListPage() {
@@ -19,21 +25,33 @@ export default function LessonsListPage() {
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
   const [q, setQ] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const t = useTranslations("teacherLessons");
+  const tCommon = useTranslations("common");
+  const { show } = useToast();
 
   useEffect(() => {
     (async () => {
-      const params = new URLSearchParams();
-      if (status !== 'ALL') params.set('status', status);
-      if (pub !== 'ALL') params.set('published', pub);
-      if (from) params.set('from', from);
-      if (to) params.set('to', to);
-      if (q) params.set('q', q);
-      const qs = params.toString();
-      const url = `/api/lessons${qs ? `?${qs}` : ''}`;
-      const res = await fetch(url, { cache: "no-store" });
-      if (res.ok) setLessons(await res.json());
-      const newUrl = `/teacher/lessons${qs ? `?${qs}` : ''}`;
-      if (typeof window !== 'undefined') window.history.replaceState(null, '', newUrl);
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (status !== 'ALL') params.set('status', status);
+        if (pub !== 'ALL') params.set('published', pub);
+        if (from) params.set('from', from);
+        if (to) params.set('to', to);
+        if (q) params.set('q', q);
+        const qs = params.toString();
+        const url = `/api/lessons${qs ? `?${qs}` : ''}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(String(res.status));
+        setLessons(await res.json());
+        const newUrl = `/teacher/lessons${qs ? `?${qs}` : ''}`;
+        if (typeof window !== 'undefined') window.history.replaceState(null, '', newUrl);
+      } catch {
+        show(tCommon("error"), "error");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [status, pub, from, to, q]);
 
@@ -55,27 +73,30 @@ export default function LessonsListPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">{(document?.cookie||'').includes('locale=es') ? 'Clases' : 'Lessons'}</h1>
-        <Link className="border px-3 py-2 rounded" href="/teacher/lessons/new">{(document?.cookie||'').includes('locale=es') ? 'Nueva clase' : 'New lesson'}</Link>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <Button asChild>
+          <Link href="/teacher/lessons/new">+ {t("new")}</Link>
+        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
         <select className="border rounded px-2 py-1" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="ALL">{(document?.cookie||'').includes('locale=es') ? 'Todos los estados' : 'All statuses'}</option>
-          <option value="CREATED">{(document?.cookie||'').includes('locale=es') ? 'Creada' : 'Created'}</option>
-          <option value="COMPLETED">{(document?.cookie||'').includes('locale=es') ? 'Completada' : 'Completed'}</option>
+          <option value="ALL">{t("allStatuses")}</option>
+          <option value="CREATED">Created</option>
+          <option value="COMPLETED">Completed</option>
         </select>
         <select className="border rounded px-2 py-1" value={pub} onChange={(e) => setPub(e.target.value)}>
           <option value="ALL">All visibility</option>
-          <option value="YES">Published</option>
-          <option value="NO">Draft</option>
+          <option value="YES">{t("published")}</option>
+          <option value="NO">{t("draft")}</option>
         </select>
-        <input className="border rounded px-2 py-1" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        <input className="border rounded px-2 py-1" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-        <input className="border rounded px-2 py-1" placeholder="Search" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        <Input placeholder={t("search")} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
+      {loading && <div className="text-sm text-gray-500 inline-flex items-center gap-2"><Spinner /> {tCommon("loading")}</div>}
       <ul className="space-y-2">
         {filtered.map((l: LessonListItem) => (
-          <li key={l.id} className="border rounded p-3">
+          <li key={l.id} className="border border-default rounded p-3 bg-card">
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-medium">{l.classType?.name ?? "Class"} · {l.durationMin}m · {(new Date(l.startsAtUtc)).toLocaleString()}</div>
@@ -84,17 +105,57 @@ export default function LessonsListPage() {
                   <span>{l.student?.user?.firstName} {l.student?.user?.lastName}</span>
                 </div>
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${l.published ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{l.published ? "Published" : "Draft"}</span>
+              <div className="flex items-center gap-2">
+                {l.recurrence && (
+                  <span className={`text-xs px-2 py-1 rounded ${l.recurrence === 'BIWEEKLY' ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
+                    {l.recurrence === 'BIWEEKLY' ? 'Biweekly' : 'Weekly'}
+                  </span>
+                )}
+                <span className={`text-xs px-2 py-1 rounded ${l.published ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{l.published ? t("published") : t("draft")}</span>
+              </div>
             </div>
             <div className="mt-2 flex gap-2">
-              <a className="border px-2 py-1 rounded" href={`/teacher/lessons/${l.id}/edit`}>{(document?.cookie||'').includes('locale=es') ? 'Editar' : 'Edit'}</a>
-              <button className="border px-2 py-1 rounded" onClick={async () => { if (!confirm((document?.cookie||'').includes('locale=es') ? '¿Eliminar la clase y todas sus ocurrencias?' : 'Delete this class and all its occurrences?')) return; await fetch(`/api/lessons/${l.id}`, { method: 'DELETE' }); location.reload(); }}>{(document?.cookie||'').includes('locale=es') ? 'Eliminar' : 'Delete'}</button>
-              <button className="border px-2 py-1 rounded" onClick={async () => { await fetch(`/api/lessons/${l.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ published: !l.published }) }); location.reload(); }}>{l.published ? ((document?.cookie||'').includes('locale=es') ? 'Despublicar' : 'Unpublish') : ((document?.cookie||'').includes('locale=es') ? 'Publicar' : 'Publish')}</button>
-              <a className="border px-2 py-1 rounded" href={`/teacher/lessons/${l.id}/resources`}>{(document?.cookie||'').includes('locale=es') ? 'Recursos' : 'Resources'}</a>
+              <Button asChild variant="outline" size="sm">
+                <a href={`/teacher/lessons/${l.id}/edit`}>{t("edit")}</a>
+              </Button>
+              <Button
+                variant="outline" size="sm"
+                onClick={async () => {
+                  if (!confirm(t("confirmDelete"))) return;
+                  try {
+                    const r = await fetch(`/api/lessons/${l.id}`, { method: 'DELETE' });
+                    if (!r.ok) throw new Error();
+                    show(tCommon("success"), "success");
+                    location.reload();
+                  } catch {
+                    show(tCommon("error"), "error");
+                  }
+                }}
+              >
+                {t("delete")}
+              </Button>
+              <Button
+                variant="outline" size="sm"
+                onClick={async () => {
+                  try {
+                    const r = await fetch(`/api/lessons/${l.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ published: !l.published }) });
+                    if (!r.ok) throw new Error();
+                    show(tCommon("success"), "success");
+                    location.reload();
+                  } catch {
+                    show(tCommon("error"), "error");
+                  }
+                }}
+              >
+                {l.published ? t("unpublish") : t("publish")}
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <a href={`/teacher/lessons/${l.id}/resources`}>{tCommon("resources")}</a>
+              </Button>
             </div>
           </li>
         ))}
-        {filtered.length === 0 && <li className="text-sm text-gray-600">No lessons found</li>}
+        {filtered.length === 0 && <li className="text-sm text-gray-600">{t("noLessons")}</li>}
       </ul>
     </div>
   );

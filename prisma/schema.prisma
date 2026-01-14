@@ -129,6 +129,8 @@ model LessonException {
   reason    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([lessonId, dateUtc], name: "lessonId_dateUtc")
 }
 
 model LessonResource {
@@ -184,4 +186,75 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// --- Marketing / Homepage PageBuilder ---
+enum PageBlockType {
+  HERO
+  CHALLENGE
+  CURVED_ROW
+  GRID_CARDS
+  AUDIO_LIST
+  SPOTLIGHT
+  EVENTS
+  NEWSLETTER
+  WHATSAPP
+  BLOG_CARDS
+}
+
+model PageBlock {
+  id        String        @id @default(cuid())
+  type      PageBlockType
+  path      String        @default("/") // route where it will render, e.g. "/" for homepage
+  locale    String        @default("en")
+  position  Int           @default(0)
+  data      Json          // arbitrary props for the block (title, subtitle, items, media, etc.)
+  audiences Json?         // e.g. ["PARENTS","STUDENTS","TEACHERS"], null => all
+  published Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  locale    String   @default("en")
+  source    String?  // e.g. "homepage"
+  createdAt DateTime @default(now())
+}
+
+model EventLog {
+  id        String   @id @default(cuid())
+  action    String   // PLAY | CLICK | SUBSCRIBE | VIEW
+  block     String   // AUDIO_LIST | NEWSLETTER | WHATSAPP | SPOTLIGHT | EVENTS | ...
+  path      String
+  locale    String   @default("en")
+  meta      Json?
+  createdAt DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  targetId  String?
+  path      String?
+  locale    String?  @default("en")
+  meta      Json?
+  createdAt DateTime @default(now())
+}
+
+// --- Blog ---
+model BlogPost {
+  id        String   @id @default(cuid())
+  locale    String   @default("en")
+  title     String
+  slug      String
+  excerpt   String?
+  tag       String?
+  imageUrl  String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([locale, slug], name: "blog_locale_slug")
 }

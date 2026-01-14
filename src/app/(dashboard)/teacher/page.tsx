@@ -26,12 +26,12 @@ export default async function TeacherPage() {
 		<div className="max-w-5xl mx-auto px-4 py-8">
 			<h1 className="text-2xl font-semibold mb-6">{t.title}</h1>
 			<div className="mb-4 flex gap-2">
-				<Link className="border px-3 py-2 rounded" href="/teacher/students/new">{t.new}</Link>
-				<Link className="border px-3 py-2 rounded" href="/teacher/map">{locale === "es" ? "Ver mapa" : "View map"}</Link>
+				<Link className="border border-default px-3 py-2 rounded bg-card hover:bg-primary/10" href="/teacher/students/new">{t.new}</Link>
+				<Link className="border border-default px-3 py-2 rounded bg-card hover:bg-primary/10" href="/teacher/map">{locale === "es" ? "Ver mapa" : "View map"}</Link>
 			</div>
 			<ul className="space-y-2">
 				{students.map((s: StudentWithUser) => (
-					<li key={s.id} className="border rounded p-3">
+					<li key={s.id} className="border border-default rounded p-3 bg-card">
 						<div className="font-medium flex items-center gap-2">
 							<img src={s.user.image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
 							<span>{s.user.firstName} {s.user.lastName}</span>

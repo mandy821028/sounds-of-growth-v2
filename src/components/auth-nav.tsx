@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+import { ChevronDown } from "lucide-react";
 
-export default function AuthNav({ locale = "en" }: { locale?: "en" | "es" }) {
+export default function AuthNav() {
+  const t = useTranslations("common");
   const { status, data } = useSession();
   const isLoggedIn = status === "authenticated";
   // update image when changed in profile
@@ -26,38 +29,34 @@ export default function AuthNav({ locale = "en" }: { locale?: "en" | "es" }) {
       return () => window.removeEventListener('avatar-change', onAvatarChange);
     }
   }, []);
-  const labels = {
-    dashboard: locale === "es" ? "Panel" : "Dashboard",
-    login: locale === "es" ? "Ingresar" : "Login",
-    profile: locale === "es" ? "Perfil" : "Profile",
-    changePwd: locale === "es" ? "Cambiar contraseña" : "Change password",
-    logout: locale === "es" ? "Salir" : "Logout",
-  };
   return isLoggedIn ? (
     <div className="flex items-center gap-2">
-      <Link href="/me" className="text-sm">{labels.dashboard}</Link>
+      <Link href="/me" className="text-sm">{t("dashboard")}</Link>
       <div className="flex items-center gap-2">
         <img src={avatar ?? (data?.user?.image as any) ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">{data?.user?.name ?? "Account"}</Button>
+          <Button variant="outline" size="sm" className="border-default inline-flex items-center gap-2">
+            {data?.user?.name ?? "Account"}
+            <ChevronDown className="w-4 h-4 opacity-80" />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href="/account">{labels.profile}</Link>
+            <Link href="/account">{t("profile")}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/account/change-password">{labels.changePwd}</Link>
+            <Link href="/account/change-password">{t("changePassword")}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
-            {labels.logout}
+            {t("logout")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       </div>
     </div>
   ) : (
-    <Link href="/login" className="text-sm">{labels.login}</Link>
+    <Link href="/login" className="text-sm">{t("login")}</Link>
   );
 }
 

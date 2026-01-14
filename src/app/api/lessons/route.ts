@@ -12,7 +12,7 @@ const createLessonSchema = z.object({
   startsAtUtc: z.string().datetime(),
   durationMin: z.enum(["30", "45", "60"]).transform((v) => Number(v)),
   timezone: z.string().min(1),
-  recurrence: z.string().optional(),
+  recurrence: z.enum(["WEEKLY", "BIWEEKLY"]).optional(),
   recurrenceEndUtc: z.string().datetime().optional(),
   priceUsd: z.number().min(0),
   address: z.string().optional(),

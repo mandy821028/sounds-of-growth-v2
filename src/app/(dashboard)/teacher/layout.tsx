@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
 import { prisma } from "@/lib/prisma";
+import SidebarNav from "@/components/sidebar-nav";
 
 export default async function TeacherSectionLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -27,16 +28,15 @@ export default async function TeacherSectionLayout({ children }: { children: Rea
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-12 gap-6">
       <aside className="col-span-12 md:col-span-3">
-        <nav className="space-y-2">
-          <Link className="block border rounded px-3 py-2" href="/teacher">{t.students}</Link>
-          <Link className="block border rounded px-3 py-2" href="/teacher/lessons">{t.lessons}</Link>
-          <Link className="block border rounded px-3 py-2 flex items-center justify-between" href="/teacher/lessons/requests">
-            <span>{t.requests}</span>
-            {pendingCount > 0 && <span className="text-xs bg-amber-100 text-amber-700 rounded px-2 py-0.5">{pendingCount}</span>}
-          </Link>
-          <Link className="block border rounded px-3 py-2 opacity-60 pointer-events-none" href="#">{t.groups}</Link>
-          <Link className="block border rounded px-3 py-2" href="/calendar">{t.calendar}</Link>
-        </nav>
+        <SidebarNav
+          items={[
+            { label: t.students, href: "/teacher" },
+            { label: t.lessons, href: "/teacher/lessons" },
+            { label: t.requests, href: "/teacher/lessons/requests", badgeCount: pendingCount || 0 },
+            { label: t.groups, href: "#", disabled: true },
+            { label: t.calendar, href: "/calendar" },
+          ]}
+        />
       </aside>
       <section className="col-span-12 md:col-span-9">
         {children}

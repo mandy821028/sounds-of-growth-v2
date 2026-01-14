@@ -17,18 +17,30 @@ export async function GET(req: Request) {
   let lessons: any[] = [];
   let teacherId: string | null = null;
   let studentId: string | null = null;
+  // date range predicate: include non-recurring inside range OR recurring that overlaps range
+  const rangeOverlap: any = {
+    OR: [
+      { recurrence: null, startsAtUtc: { gte: start, lte: end } },
+      {
+        recurrence: { not: null },
+        startsAtUtc: { lte: end },
+        OR: [{ recurrenceEndUtc: null }, { recurrenceEndUtc: { gte: start } }],
+      },
+    ],
+  };
+
   if (sUser?.role === "SUPER_ADMIN") {
-    lessons = await prisma.lesson.findMany({ where: { startsAtUtc: { gte: start, lte: end } }, include: { student: { include: { user: true } }, teacher: { include: { user: true } }, classType: true } });
+    lessons = await prisma.lesson.findMany({ where: rangeOverlap, include: { student: { include: { user: true } }, teacher: { include: { user: true } }, classType: true } });
   } else if (sUser?.role === "TEACHER") {
     const t = await prisma.teacher.findUnique({ where: { userId: sUser.id } });
     if (!t) return new NextResponse("Forbidden", { status: 403 });
     teacherId = t.id;
-    lessons = await prisma.lesson.findMany({ where: { teacherId: t.id, startsAtUtc: { gte: start, lte: end } }, include: { student: { include: { user: true } }, classType: true } });
+    lessons = await prisma.lesson.findMany({ where: { teacherId: t.id, ...rangeOverlap }, include: { student: { include: { user: true } }, classType: true } });
   } else if (sUser?.role === "STUDENT") {
     const st = await prisma.student.findUnique({ where: { userId: sUser.id } });
     if (!st) return new NextResponse("Forbidden", { status: 403 });
     studentId = st.id;
-    lessons = await prisma.lesson.findMany({ where: { studentId: st.id, published: true, startsAtUtc: { gte: start, lte: end } }, include: { teacher: { include: { user: true } }, classType: true } });
+    lessons = await prisma.lesson.findMany({ where: { studentId: st.id, published: true, ...rangeOverlap }, include: { teacher: { include: { user: true } }, classType: true } });
   } else {
     return new NextResponse("Forbidden", { status: 403 });
   }
@@ -50,7 +62,7 @@ export async function GET(req: Request) {
     exceptMap.set(key(ex.lessonId, new Date(ex.dateUtc).toISOString()), ex.type);
   }
 
-  // Expand weekly recurrence (very simple): include base + every 7 days until recurrenceEndUtc
+  // Expand recurrence: weekly (7d) or biweekly (14d)
   const events: any[] = [];
   for (const l of lessons) {
     const base = new Date(l.startsAtUtc);
@@ -74,9 +86,10 @@ export async function GET(req: Request) {
     } else {
       let d = new Date(base);
       const until = l.recurrenceEndUtc ? new Date(l.recurrenceEndUtc) : end;
+      const stepDays = l.recurrence === 'BIWEEKLY' ? 14 : 7;
       while (d <= end && d <= until) {
         if (d >= start) push(new Date(d));
-        d = new Date(d.getTime() + 7 * 24 * 3600e3);
+        d = new Date(d.getTime() + stepDays * 24 * 3600e3);
       }
     }
   }
