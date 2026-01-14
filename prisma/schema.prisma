@@ -258,3 +258,26 @@ model BlogPost {
 
   @@unique([locale, slug], name: "blog_locale_slug")
 }
+
+// --- Social Links ---
+enum SocialProvider {
+  FACEBOOK
+  INSTAGRAM
+  YOUTUBE
+  TIKTOK
+  TWITTER
+  WHATSAPP
+  LINKEDIN
+}
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  provider  SocialProvider
+  label     String
+  url       String
+  iconUrl   String?
+  order     Int            @default(0)
+  enabled   Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
