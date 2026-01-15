@@ -15,7 +15,7 @@ NEXTAUTH_SECRET=RELLENAR_O_DEJAR_EL_EXISTENTE
 NEXTAUTH_URL=http://localhost:3000
 
 # Seed SUPER ADMIN
-SEED_SUPER_ADMIN_EMAIL=admin@example.com
+SEED_SUPER_ADMIN_EMAIL=admin@soundsofgrowth.com
 SEED_SUPER_ADMIN_PASSWORD=ChangeMeStrong!123
 SEED_SUPER_ADMIN_FIRST_NAME=Super
 SEED_SUPER_ADMIN_LAST_NAME=Admin
@@ -70,7 +70,7 @@ npm run lint
 
 ## Acceso
 - Login: http://localhost:3000/login
-- SUPER ADMIN (seed): `admin@example.com` / `ChangeMeStrong!123`
+- SUPER ADMIN (seed): `admin@soundsofgrowth.com` / `ChangeMeStrong!123`
 - Panel Super Admin: `/super-admin`
 - Panel Docente: `/teacher`
 

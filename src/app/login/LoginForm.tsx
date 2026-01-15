@@ -82,41 +82,33 @@ export default function LoginForm() {
 
 	return (
 		<div className="max-w-md mx-auto py-16">
-			<h1 className="text-2xl font-semibold mb-6">{t("title")}</h1>
+			<img
+				src="/logo_animated.svg"
+				alt="Sounds of Growth"
+				className="mx-auto mb-6 h-40 w-auto"
+			/>
+			<h1 className="text-2xl font-semibold mb-4 text-center">{t("title")}</h1>
 			<div className="space-y-4" onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}>
 				<Input
 					type="email"
 					placeholder={t("email")}
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
+					className="bg-white border-gray-300"
 				/>
 				<Input
 					type="password"
 					placeholder={t("password")}
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
+					className="bg-white border-gray-300"
 				/>
-				<Button type="button" onClick={handleSubmit} className="w-full" disabled={isLoading}>
+				<Button type="button" onClick={handleSubmit} className="w-full text-white bg-teal-600 hover:bg-teal-700" disabled={isLoading}>
 					{isLoading ? (<span className="inline-flex items-center gap-2"><Spinner /> {tCommon("loading")}</span>) : t("submit")}
 				</Button>
 			</div>
 			{error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-			<div className="mt-6">
-				<Button variant="outline"
-					className="w-full"
-					onClick={async () => {
-						try {
-							await signIn("email", { email, callbackUrl: "/me" });
-							show(tCommon("success"), "success");
-						} catch {
-							show(t("genericError"), "error");
-						}
-					}}
-					disabled={!email || isLoading}
-				>
-					{t("magic")}
-				</Button>
-			</div>
+			{/* Magic link (email) flow removed for clarity; can be re-enabled when SMTP is configured */}
 		</div>
 	);
 }
