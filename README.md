@@ -31,6 +31,9 @@ EMAIL_SERVER_USER=EMAIL_SERVER_PASSWORD=
 EMAIL_FROM=no-reply@soundsofgrowth.com
 ```
 
+## SSH
+ssh root@85.31.224.156
+
 ## Instalación
 ```
 npm install
