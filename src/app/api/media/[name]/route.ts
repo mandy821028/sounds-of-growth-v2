@@ -12,8 +12,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: { name: st
   try {
     await fs.unlink(path.join(assetsDir, name));
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "ENOENT") return NextResponse.json({ ok: true });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as any).code === "ENOENT") return NextResponse.json({ ok: true });
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }

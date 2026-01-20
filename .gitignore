@@ -27,6 +27,9 @@ prisma/dev.db
 prisma/*.sqlite
 prisma/*.db-journal
 
+# Uploaded media in production (ignore everything in public/assets
+/public/assets/*
+
 # Misc
 .pnpm-store/
 *.swp

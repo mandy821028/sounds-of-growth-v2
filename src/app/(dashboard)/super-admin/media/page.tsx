@@ -2,10 +2,6 @@ import { cookies } from "next/headers";
 import { promises as fs } from "fs";
 import path from "path";
 
-function isImage(name: string) {
-  return /\.(png|jpe?g|gif|webp|svg)$/i.test(name);
-}
-
 export const dynamic = "force-dynamic";
 
 export default async function MediaLibraryPage() {
