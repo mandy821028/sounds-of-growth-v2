@@ -101,6 +101,32 @@
   "studentHome": {
     "title": "Inicio",
     "subtitle": "Bienvenido(a) al panel de alumno"
+  },
+  "marketingNav": {
+    "about": "Nosotros",
+    "services": "Servicios",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "getStarted": "Empezar",
+    "menu": "Menú",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "marketingSections": {
+    "aboutTitle": "Educación musical con método",
+    "aboutBody": "Ayudamos a niños a desarrollar confianza y musicalidad con clases estructuradas, materiales guiados y retroalimentación constante.",
+    "servicesTitle": "Nuestros servicios",
+    "servicesBody": "Elige el camino que se adapte a tus objetivos. Metas claras, práctica divertida y progreso real.",
+    "service1Title": "Clases 1:1",
+    "service1Body": "Clases personalizadas según el ritmo e intereses de cada estudiante.",
+    "service2Title": "Práctica guiada",
+    "service2Body": "Materiales y objetivos semanales para mantener el avance entre clases.",
+    "service3Title": "Seguimiento",
+    "service3Body": "Reportes simples y feedback para que la familia vea el progreso con el tiempo.",
+    "contactTitle": "Contáctanos",
+    "contactBody": "Cuéntanos tus objetivos y te recomendamos el mejor siguiente paso.",
+    "contactCta": "Envíanos un email"
+  }
   }
 }
 

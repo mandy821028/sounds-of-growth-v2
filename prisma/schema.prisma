@@ -281,3 +281,29 @@ model SocialLink {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 }
+
+// --- Marketing: Home Slider ---
+model SliderItem {
+  id           String   @id @default(cuid())
+  locale       String   @default("en")
+  title        String
+  subtitle     String?
+  imageUrl     String
+  buttonLabel  String?
+  buttonHref   String?
+  buttonTarget String   @default("_self") // "_self" | "_blank"
+  order        Int      @default(0)
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SliderConfig {
+  id            String   @id @default(cuid())
+  locale        String   @unique @default("en")
+  intervalMs    Int      @default(6500)
+  transition    String   @default("fade")     // "fade" | "slide"
+  textAnimation String   @default("fade-up")  // "none" | "fade" | "fade-up"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

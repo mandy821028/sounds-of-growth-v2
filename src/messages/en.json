@@ -101,6 +101,31 @@
   "studentHome": {
     "title": "Home",
     "subtitle": "Welcome to the student dashboard"
+  },
+  "marketingNav": {
+    "about": "About",
+    "services": "Services",
+    "blog": "Blog",
+    "contact": "Contact",
+    "getStarted": "Get started",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "marketingSections": {
+    "aboutTitle": "Music education with a method",
+    "aboutBody": "We help children build confidence and musicality through structured lessons, guided materials, and consistent feedback.",
+    "servicesTitle": "Our services",
+    "servicesBody": "Choose the learning path that fits your goals. Clear milestones, fun practice, and real progress.",
+    "service1Title": "1:1 lessons",
+    "service1Body": "Personalized classes tailored to each student’s rhythm and interests.",
+    "service2Title": "Guided practice",
+    "service2Body": "Materials and weekly goals to keep progress steady between lessons.",
+    "service3Title": "Progress tracking",
+    "service3Body": "Simple reports and feedback so families can see growth over time.",
+    "contactTitle": "Contact us",
+    "contactBody": "Tell us about your goals and we’ll recommend the best next step.",
+    "contactCta": "Send us an email"
   }
 }
 
