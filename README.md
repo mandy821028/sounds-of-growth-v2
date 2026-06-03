@@ -1,4 +1,4 @@
-# Sounds of Growth
+# Sounds of Growth V2
 
 Plataforma para docentes de música y sus alumnos (Next.js App Router + TypeScript + Prisma + NextAuth).
 
