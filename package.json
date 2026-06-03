@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && prisma db push && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "deploy": "npm run deploy:full",
     "deploy:full": "git pull && npm ci && npm run prisma:sync && npm run build && pm2 restart sog --update-env",

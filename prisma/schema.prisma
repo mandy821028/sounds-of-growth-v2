@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
  
@@ -15,7 +15,7 @@ model User {
   email          String    @unique
   emailVerified  DateTime?
   name           String?
-  image          String?
+  image          String?   @db.Text
   hashedPassword String?
   firstName      String
   lastName       String
@@ -48,7 +48,7 @@ model Student {
   teacher      Teacher  @relation(fields: [teacherId], references: [id])
   teacherId    String
   dateOfBirth  DateTime
-  address      String?
+  address      String?  @db.Text
   lat          Float?
   lng          Float?
   lessons      Lesson[]
@@ -85,7 +85,7 @@ model Lesson {
   recurrence   String?
   recurrenceEndUtc DateTime?
   priceUsd     Float
-  address      String?
+  address      String?  @db.Text
   lat          Float?
   lng          Float?
   published    Boolean @default(false)
@@ -110,7 +110,7 @@ model LessonCancellationRequest {
   student   Student @relation(fields: [studentId], references: [id])
   studentId String
   requestedDateUtc DateTime
-  reason    String?
+  reason    String? @db.Text
   status    CancelRequestStatus @default(PENDING)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -126,7 +126,7 @@ model LessonException {
   lessonId  String
   dateUtc   DateTime
   type      LessonExceptionType
-  reason    String?
+  reason    String? @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -138,7 +138,7 @@ model LessonResource {
   lesson      Lesson   @relation(fields: [lessonId], references: [id])
   lessonId    String
   title       String
-  contentHtml String   // stored rich-text HTML
+  contentHtml String   @db.LongText // stored rich-text HTML
   links       Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -156,15 +156,15 @@ model Account {
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?
-  access_token       String?
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?
+  id_token           String? @db.Text
   session_state      String?
-  oauth_token_secret String?
-  oauth_token        String?
+  oauth_token_secret String? @db.Text
+  oauth_token        String? @db.Text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -249,9 +249,9 @@ model BlogPost {
   locale    String   @default("en")
   title     String
   slug      String
-  excerpt   String?
+  excerpt   String?  @db.Text
   tag       String?
-  imageUrl  String?
+  imageUrl  String?  @db.Text
   published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -274,8 +274,8 @@ model SocialLink {
   id        String         @id @default(cuid())
   provider  SocialProvider
   label     String
-  url       String
-  iconUrl   String?
+  url       String         @db.Text
+  iconUrl   String?        @db.Text
   order     Int            @default(0)
   enabled   Boolean        @default(true)
   createdAt DateTime       @default(now())
@@ -287,10 +287,10 @@ model SliderItem {
   id           String   @id @default(cuid())
   locale       String   @default("en")
   title        String
-  subtitle     String?
-  imageUrl     String
+  subtitle     String?  @db.Text
+  imageUrl     String   @db.Text
   buttonLabel  String?
-  buttonHref   String?
+  buttonHref   String?  @db.Text
   buttonTarget String   @default("_self") // "_self" | "_blank"
   order        Int      @default(0)
   enabled      Boolean  @default(true)

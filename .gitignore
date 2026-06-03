@@ -24,7 +24,9 @@ coverage/
 
 # Prisma local DBs
 prisma/dev.db
+prisma/prod.db
 prisma/*.sqlite
+prisma/*.db
 prisma/*.db-journal
 
 # Uploaded media in production (ignore everything in public/assets

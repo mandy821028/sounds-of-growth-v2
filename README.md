@@ -10,7 +10,9 @@ Plataforma para docentes de música y sus alumnos (Next.js App Router + TypeScri
 Copia `.env.local` (ya creada) o crea una nueva con, por ejemplo:
 
 ```
-DATABASE_URL=file:./dev.db
+# MySQL (local o Hostinger). Formato:
+# mysql://USUARIO:CONTRASENA@HOST:3306/NOMBRE_BD
+DATABASE_URL=mysql://root:password@localhost:3306/sounds_of_growth
 NEXTAUTH_SECRET=RELLENAR_O_DEJAR_EL_EXISTENTE
 NEXTAUTH_URL=http://localhost:3000
 
@@ -24,10 +26,14 @@ SEED_SUPER_ADMIN_LOCALE=en
 # Contact/marketing
 NEXT_PUBLIC_WHATSAPP_NUMBER=15551234567
 
+# Google Maps (mapa de alumnos + autocompletado de direcciones)
+GOOGLE_MAPS_API_KEY=
+
 # SMTP (opcional para magic link)
 EMAIL_SERVER_HOST=
 EMAIL_SERVER_PORT=587
-EMAIL_SERVER_USER=EMAIL_SERVER_PASSWORD=
+EMAIL_SERVER_USER=
+EMAIL_SERVER_PASSWORD=
 EMAIL_FROM=no-reply@soundsofgrowth.com
 ```
 
@@ -44,7 +50,7 @@ Terminal A:
 ```
 # Generar cliente Prisma
 npm run prisma:generate
-# Crear/actualizar esquema en SQLite
+# Crear/actualizar esquema en MySQL
 npm run prisma:push
 # Seed SUPER ADMIN (usa .env.local)
 npm run db:seed
@@ -90,7 +96,7 @@ npm start
 
 ## Tech stack
 - Next.js (App Router), TypeScript
-- Prisma ORM (SQLite dev; Postgres recomendado para prod)
+- Prisma ORM (MySQL)
 - NextAuth (credenciales + email provider opcional)
 - TailwindCSS + shadcn/ui
 - Zod, ESLint
