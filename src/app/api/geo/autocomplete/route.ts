@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireSession, isAuthError } from "@/lib/auth";
 
 export async function GET(req: Request) {
+  const auth = await requireSession();
+  if (isAuthError(auth)) return auth;
+
   const { searchParams } = new URL(req.url);
   const input = searchParams.get("q") || "";
   const locale = searchParams.get("lang") || "en";

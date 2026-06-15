@@ -1,99 +1,303 @@
 @import "tailwindcss";
 
-/* Design tokens: default dark; switchable via html.theme-light / html.theme-dark */
+/* ── Static design tokens (font families, radius scale) ─────────────────── */
+@theme {
+  --font-heading: var(--font-heading-var, 'Cormorant Garamond', serif);
+  --font-body:    var(--font-body-var,    'DM Sans',            sans-serif);
+
+  --radius-sm: calc(1.25rem - 6px); /* 14px */
+  --radius-md: calc(1.25rem - 4px); /* 16px */
+  --radius-lg: 1.25rem;             /* 20px */
+  --radius-xl: 1.65rem;             /* ~26px — playful card */
+  --radius-4xl: 2rem;               /* 32px */
+}
+
+/* ── Light mode (default, matches sounds-of-growth-web exactly) ─────────── */
 :root,
-html.theme-dark {
-	--background: #0b0f14;     /* app bg */
-	--foreground: #e5e7eb;     /* text */
-	--card: #111827;           /* panels/cards */
-	--muted: #9ca3af;          /* secondary text */
-	--border: color-mix(in oklab, #0097b2 30%, transparent); /* subtle teal border */
-	--input: #111827;          /* inputs bg */
-	--ring: #0097b2;           /* focus ring */
-	--primary: #0097b2;        /* teal from logo */
-	--primary-foreground: #041314;
-	--secondary: #1f2937;
-	--secondary-foreground: #e5e7eb;
-	--radius: 0.5rem;
-}
-
 html.theme-light {
-	--background: #ffffff;
-	--foreground: #111827;
-	--card: #ffffff;
-	--muted: #6b7280;
-	--border: color-mix(in oklab, #0097b2 20%, #e5e7eb);
-	--input: #ffffff;
-	--ring: #0097b2;
-	--primary: #0097b2;
-	--primary-foreground: #082f49;
-	--secondary: #f3f4f6;
-	--secondary-foreground: #111827;
-	--radius: 0.5rem;
+  --background:             #f2fafc;
+  --foreground:             #1b242d;
+  --card:                   #ffffff;
+  --card-foreground:        #1b242d;
+  --popover:                #ffffff;
+  --popover-foreground:     #1b242d;
+  --primary:                #0097b2;
+  --primary-hover:          #007994;
+  --primary-foreground:     #ffffff;
+  --secondary:              #e7f7f8;
+  --secondary-foreground:   #194c57;
+  --muted:                  #f0f8f9;
+  --muted-foreground:       #5e6b78;
+  --accent:                 #d5f4f6;
+  --accent-foreground:      #194c57;
+  --destructive:            #ef4444;
+  --destructive-foreground: #fafafa;
+  --border:                 #d6e8eb;
+  --input:                  #d6e8eb;
+  --input-bg:               #ffffff;
+  --ring:                   #0097b2;
+  --coral:                  #ff8a7a;
+  --teal-bright:            #16c0b7;
+  --teal-light:             #97edf2;
+  --surface-aqua:           #edfbfc;
+  --brand-deep:             #0f6e8a;
 }
 
+/* ── Dark mode (brand teal on deep navy) ────────────────────────────────── */
+html.theme-dark {
+  --background:             #091520;
+  --foreground:             #ddf0f6;
+  --card:                   #0e1e2d;
+  --card-foreground:        #ddf0f6;
+  --popover:                #0e1e2d;
+  --popover-foreground:     #ddf0f6;
+  --primary:                #0097b2;
+  --primary-hover:          #00aece;
+  --primary-foreground:     #ffffff;
+  --secondary:              #0c2433;
+  --secondary-foreground:   #8ecfdb;
+  --muted:                  #142536;
+  --muted-foreground:       #6fa8b8;
+  --accent:                 #0c3040;
+  --accent-foreground:      #a2d8e6;
+  --destructive:            #ef4444;
+  --destructive-foreground: #fafafa;
+  --border:                 #163347;
+  --input:                  #163347;
+  --input-bg:               #0e1e2d;
+  --ring:                   #0097b2;
+  --coral:                  #ff8a7a;
+  --teal-bright:            #16c0b7;
+  --teal-light:             #163347;
+  --surface-aqua:           #0c2433;
+  --brand-deep:             #0f6e8a;
+}
+
+/* ── Map dynamic vars → Tailwind color utilities ────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background:             var(--background);
+  --color-foreground:             var(--foreground);
+  --color-card:                   var(--card);
+  --color-card-foreground:        var(--card-foreground);
+  --color-popover:                var(--popover);
+  --color-popover-foreground:     var(--popover-foreground);
+  --color-primary:                var(--primary);
+  --color-primary-hover:          var(--primary-hover);
+  --color-primary-foreground:     var(--primary-foreground);
+  --color-secondary:              var(--secondary);
+  --color-secondary-foreground:   var(--secondary-foreground);
+  --color-muted:                  var(--muted);
+  --color-muted-foreground:       var(--muted-foreground);
+  --color-accent:                 var(--accent);
+  --color-accent-foreground:      var(--accent-foreground);
+  --color-destructive:            var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:                 var(--border);
+  --color-input:                  var(--input);
+  --color-ring:                   var(--ring);
+  --color-coral:                  var(--coral);
+  --color-teal-bright:            var(--teal-bright);
+  --color-teal-light:             var(--teal-light);
+  --color-surface-aqua:           var(--surface-aqua);
+  --color-brand-deep:             var(--brand-deep);
 }
 
+/* ── Base styles ────────────────────────────────────────────────────────── */
 html {
+  font-size: 100%;
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  font-family: var(--font-body), 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
 }
 
-/* Elements */
-.card {
-  background-color: var(--card);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
 }
 
-/* Utilities */
-.border-default {
+*, *::before, *::after {
   border-color: var(--border);
 }
 
-/* Focus ring alignment with tokens (for components that don't use shadcn ring classes) */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 55%, transparent);
 }
 
-/* --- Micro-interactions & animations --- */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px) }
-  to { opacity: 1; transform: translateY(0) }
+/* ── Shared component classes (mirror sounds-of-growth-web) ─────────────── */
+@layer components {
+  /* Eyebrows / labels */
+  .section-eyebrow {
+    font-family: var(--font-body), 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--teal-bright);
+  }
+
+  .section-eyebrow-coral {
+    font-family: var(--font-body), 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--coral);
+  }
+
+  /* Icon bubbles */
+  .icon-bubble {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background-color: color-mix(in oklab, var(--teal-bright) 15%, transparent);
+    color: var(--primary);
+    transition: color 0.2s, background-color 0.2s;
+  }
+
+  .icon-bubble-light {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background-color: var(--surface-aqua);
+    color: var(--primary);
+  }
+
+  /* Cards */
+  .playful-card {
+    border-radius: 1.65rem;
+    border: 1px solid color-mix(in oklab, var(--border) 50%, transparent);
+    background-color: var(--card);
+    box-shadow: 0 1px 3px color-mix(in oklab, var(--primary) 6%, transparent);
+    transition: all 0.3s ease;
+  }
+
+  .playful-card-hover:hover {
+    border-color: color-mix(in oklab, var(--teal-bright) 35%, transparent);
+    box-shadow: 0 8px 24px color-mix(in oklab, var(--primary) 12%, transparent);
+    transform: translateY(-2px);
+  }
+
+  /* Pill buttons (standalone, outside shadcn Button) */
+  .btn-pill-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    padding: 0.875rem 2rem;
+    font-family: var(--font-body), 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-foreground);
+    box-shadow: 0 4px 12px color-mix(in oklab, var(--primary) 20%, transparent);
+    transition: all 0.2s ease;
+  }
+
+  .btn-pill-primary:hover {
+    background-color: var(--primary-hover);
+    box-shadow: 0 6px 16px color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+
+  .btn-pill-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+    background-color: color-mix(in oklab, var(--card) 90%, transparent);
+    padding: 0.875rem 1.75rem;
+    font-family: var(--font-body), 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--foreground);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+
+  .btn-pill-outline:hover {
+    border-color: color-mix(in oklab, var(--teal-bright) 40%, transparent);
+    background-color: var(--card);
+  }
+
+  /* Brand gradients */
+  .bg-gradient-brand-ribbon {
+    background: linear-gradient(125deg, var(--brand-deep) 0%, var(--primary) 42%, var(--teal-bright) 100%);
+  }
+
+  .bg-gradient-brand-soft {
+    background: linear-gradient(180deg, var(--primary) 0%, #16a59e 100%);
+  }
+
+  .bg-gradient-cta {
+    background: linear-gradient(135deg, var(--brand-deep) 0%, var(--primary) 38%, var(--teal-bright) 88%);
+  }
+
+  /* Navigation link base */
+  .nav-link {
+    font-family: var(--font-body), 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    transition: color 0.15s ease;
+  }
+
+  .nav-link:hover,
+  .nav-link-active {
+    color: var(--primary);
+  }
 }
-.animate-fade-up { animation: fade-up .5s cubic-bezier(.2,.6,.2,1) both }
+
+/* ── Micro-interactions & animations ────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.5s cubic-bezier(0.2, 0.6, 0.2, 1) both; }
 
 @keyframes fade-in {
-  from { opacity: 0 }
-  to { opacity: 1 }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-.animate-fade-in { animation: fade-in .6s ease-out both }
+.animate-fade-in { animation: fade-in 0.6s ease-out both; }
 
 @keyframes float-slow {
-  0%   { transform: translateY(0) }
-  50%  { transform: translateY(6px) }
-  100% { transform: translateY(0) }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
 }
-.animate-float-slow { animation: float-slow 14s ease-in-out infinite }
+.animate-float-slow { animation: float-slow 14s ease-in-out infinite; }
 
-.hover-lift { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease }
-.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,.12) }
+@keyframes accordion-down {
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
+}
+
+.animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+.animate-accordion-up   { animation: accordion-up   0.2s ease-out; }
+
+.hover-lift {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px color-mix(in oklab, var(--primary) 15%, transparent);
+}

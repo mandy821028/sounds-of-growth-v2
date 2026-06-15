@@ -32,14 +32,8 @@ export const authOptions: NextAuthOptions = {
 					const email = credentials.email.trim();
 					const pwd = credentials.password.trim();
 					const user = await prisma.user.findUnique({ where: { email } });
-					console.log("[auth] credentials", { email });
-					console.log("[auth] user found?", Boolean(user));
-					if (!user || !user.hashedPassword) {
-						console.log("[auth] missing user or password hash");
-						return null;
-					}
+					if (!user || !user.hashedPassword) return null;
 					const valid = await compare(pwd, user.hashedPassword);
-					console.log("[auth] password valid?", valid);
 					if (!valid) return null;
 					const u: AppUser = {
 						id: user.id,
@@ -47,11 +41,10 @@ export const authOptions: NextAuthOptions = {
 						name: `${user.firstName} ${user.lastName}`,
 						role: user.role,
 						locale: user.locale,
-						mustChangePassword: (user as any).mustChangePassword ?? false,
+						mustChangePassword: user.mustChangePassword ?? false,
 					};
 					return u;
-				} catch (err) {
-					console.error("Credentials authorize error", err);
+				} catch {
 					return null;
 				}
 			},
@@ -74,13 +67,23 @@ export const authOptions: NextAuthOptions = {
 	],
 	callbacks: {
 		async jwt({ token, user }) {
-			// On first sign in, persist fields into token
 			if (user) {
+				// First sign-in: embed role, locale, mustChangePassword into the JWT
 				const u = user as AppUser;
 				token.id = u.id;
 				token.role = u.role;
 				token.locale = u.locale;
 				(token as any).mustChangePassword = u.mustChangePassword ?? false;
+			} else if ((token as any).id) {
+				// Subsequent requests: refresh mustChangePassword from DB so that
+				// after the user changes their password the JWT reflects the new value.
+				const dbUser = await prisma.user.findUnique({
+					where: { id: (token as any).id as string },
+					select: { mustChangePassword: true },
+				});
+				if (dbUser) {
+					(token as any).mustChangePassword = dbUser.mustChangePassword;
+				}
 			}
 			return token;
 		},

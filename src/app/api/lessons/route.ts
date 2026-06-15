@@ -42,6 +42,7 @@ export async function GET(req: Request) {
 
   const orderBy = { startsAtUtc: "asc" as const };
 
+  // MySQL uses case-insensitive collation (utf8_general_ci) by default — no mode needed
   if (sUser?.role === "SUPER_ADMIN") {
     const lessons = await prisma.lesson.findMany({
       where: {
@@ -49,9 +50,9 @@ export async function GET(req: Request) {
         ...(q
           ? {
               OR: [
-                { classType: { name: { contains: q, mode: "insensitive" } } },
-                { student: { user: { OR: [{ firstName: { contains: q, mode: "insensitive" } }, { lastName: { contains: q, mode: "insensitive" } }] } } },
-                { teacher: { user: { OR: [{ firstName: { contains: q, mode: "insensitive" } }, { lastName: { contains: q, mode: "insensitive" } }] } } },
+                { classType: { name: { contains: q } } },
+                { student: { user: { OR: [{ firstName: { contains: q } }, { lastName: { contains: q } }] } } },
+                { teacher: { user: { OR: [{ firstName: { contains: q } }, { lastName: { contains: q } }] } } },
               ],
             }
           : {}),
@@ -71,8 +72,8 @@ export async function GET(req: Request) {
         ...(q
           ? {
               OR: [
-                { classType: { name: { contains: q, mode: "insensitive" } } },
-                { student: { user: { OR: [{ firstName: { contains: q, mode: "insensitive" } }, { lastName: { contains: q, mode: "insensitive" } }] } } },
+                { classType: { name: { contains: q } } },
+                { student: { user: { OR: [{ firstName: { contains: q } }, { lastName: { contains: q } }] } } },
               ],
             }
           : {}),
@@ -88,12 +89,13 @@ export async function GET(req: Request) {
     const lessons = await prisma.lesson.findMany({
       where: {
         studentId: student.id,
+        published: true, // students only see published lessons
         ...whereBase,
         ...(q
           ? {
               OR: [
-                { classType: { name: { contains: q, mode: "insensitive" } } },
-                { teacher: { user: { OR: [{ firstName: { contains: q, mode: "insensitive" } }, { lastName: { contains: q, mode: "insensitive" } }] } } },
+                { classType: { name: { contains: q } } },
+                { teacher: { user: { OR: [{ firstName: { contains: q } }, { lastName: { contains: q } }] } } },
               ],
             }
           : {}),
@@ -117,6 +119,11 @@ export async function POST(req: Request) {
   const parsed = createLessonSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json(parsed.error.format(), { status: 400 });
   const data = parsed.data;
+
+  // IDOR guard: ensure the student actually belongs to this teacher
+  const student = await prisma.student.findUnique({ where: { id: data.studentId }, select: { teacherId: true } });
+  if (!student || student.teacherId !== teacher.id) return new NextResponse("Forbidden", { status: 403 });
+
   const lesson = await prisma.lesson.create({
     data: {
       teacherId: teacher.id,

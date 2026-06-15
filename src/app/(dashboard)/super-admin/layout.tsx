@@ -15,7 +15,7 @@ export default async function SuperAdminSectionLayout({ children }: { children: 
     media: locale === "es" ? "Biblioteca multimedia" : "Media library",
   };
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-12 gap-6">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 grid grid-cols-12 gap-6">
       <aside className="col-span-12 md:col-span-3">
         <SidebarNav
           items={[
@@ -29,7 +29,7 @@ export default async function SuperAdminSectionLayout({ children }: { children: 
           ]}
         />
       </aside>
-      <section className="col-span-12 md:col-span-9">
+      <section className="col-span-12 md:col-span-9 min-w-0">
         {children}
       </section>
     </div>

@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { requireRole, isAuthError } from "@/lib/auth";
 
 const assetsDir = path.join(process.cwd(), "public", "assets");
 
-export async function DELETE(_req: NextRequest, { params }: { params: { name: string } }) {
-  const name = params.name;
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
+  const auth = await requireRole("SUPER_ADMIN");
+  if (isAuthError(auth)) return auth;
+
+  const { name } = await params;
   if (!name || name.includes("..") || name.includes("/") || name.includes("\\")) {
     return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
   }

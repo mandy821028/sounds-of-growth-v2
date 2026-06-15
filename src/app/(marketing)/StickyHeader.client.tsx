@@ -77,31 +77,31 @@ export default function StickyHeader() {
 	}, [mobileOpen]);
 
 	return (
-		<header className="sticky top-0 z-40 border-b border-default bg-background/55 backdrop-blur supports-[backdrop-filter]:bg-background/40">
+		<header className="sticky top-0 z-50 border-b border-border/60 bg-card/90 backdrop-blur-md shadow-sm shadow-primary/[0.04]">
 			<div
 				className={cn(
-					"max-w-5xl mx-auto px-4 transition-all duration-300 flex items-center justify-between rounded-b-lg",
-					shrunk ? "h-14" : "h-24"
+					"max-w-6xl mx-auto px-6 transition-all duration-300 flex items-center justify-between",
+					shrunk ? "h-14" : "h-20"
 				)}
 			>
-				<Link href="/" aria-label="Sounds of Growth" className="flex items-center gap-2">
+				<Link href="/" aria-label="Sounds of Growth" className="flex items-center gap-2 shrink-0">
 					<img
 						src="/logo_animated.svg"
-						alt=""
-						className={`w-auto transition-all duration-300 ${shrunk ? "h-14" : "h-20"}`}
+						alt="Sounds of Growth"
+						className={`w-auto transition-all duration-300 ${shrunk ? "h-12" : "h-16"}`}
 					/>
 				</Link>
 
 				{/* Center nav (desktop) */}
-				<nav className="hidden md:flex items-center gap-6">
+				<nav className="hidden md:flex items-center gap-7">
 					{navItems.map((it) => (
 						<Link
 							key={it.href}
 							href={it.href}
-							className="group relative text-sm tracking-wide text-muted-foreground transition hover:text-foreground"
+							className="group relative font-body text-sm text-muted-foreground transition-colors duration-150 hover:text-primary"
 						>
-							<span className="uppercase">{it.label}</span>
-							<span className="pointer-events-none absolute -bottom-2 left-0 h-px w-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/70 to-cyan-400/0 transition-all duration-300 group-hover:w-full" />
+							{it.label}
+							<span className="pointer-events-none absolute -bottom-1 left-0 h-px w-0 bg-teal-bright transition-all duration-300 group-hover:w-full" style={{ background: "var(--teal-bright)" }} />
 						</Link>
 					))}
 				</nav>
@@ -114,7 +114,8 @@ export default function StickyHeader() {
 						</Button>
 					)}
 					<AuthNav />
-					<div className="hidden sm:flex items-center gap-3">
+					<div className="hidden sm:flex items-center gap-2">
+						<div className="h-4 w-px bg-border/60" />
 						<ThemeSwitch />
 						<LanguageSwitch />
 					</div>
@@ -122,7 +123,7 @@ export default function StickyHeader() {
 						type="button"
 						variant="outline"
 						size="icon"
-						className="md:hidden border-default"
+						className="md:hidden"
 						onClick={() => setMobileOpen(true)}
 						aria-label={t("openMenu")}
 						aria-haspopup="dialog"
@@ -143,7 +144,7 @@ export default function StickyHeader() {
 			>
 				<div
 					className={cn(
-						"absolute inset-0 bg-black/45 transition-opacity duration-200",
+						"absolute inset-0 bg-black/40 transition-opacity duration-200",
 						mobileOpen ? "opacity-100" : "opacity-0"
 					)}
 					onClick={() => setMobileOpen(false)}
@@ -153,19 +154,18 @@ export default function StickyHeader() {
 					aria-modal="true"
 					aria-label={t("menu")}
 					className={cn(
-						"absolute right-0 top-0 h-full w-[min(22rem,86vw)] border-l border-default bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/55 shadow-2xl transition-transform duration-300",
+						"absolute right-0 top-0 h-full w-[min(22rem,86vw)] border-l border-border/60 bg-card/95 backdrop-blur-lg shadow-2xl transition-transform duration-300",
 						mobileOpen ? "translate-x-0" : "translate-x-full"
 					)}
 				>
-					<div className="flex items-center justify-between px-4 py-4 border-b border-default">
-						<Link href="/" className="text-sm font-semibold tracking-wide" onClick={() => setMobileOpen(false)}>
+					<div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
+						<span className="font-heading text-lg font-medium text-foreground">
 							Sounds of Growth
-						</Link>
+						</span>
 						<Button
 							type="button"
 							variant="outline"
 							size="icon"
-							className="border-default"
 							onClick={() => setMobileOpen(false)}
 							aria-label={t("closeMenu")}
 						>
@@ -173,27 +173,27 @@ export default function StickyHeader() {
 						</Button>
 					</div>
 
-					<div className="px-4 py-5 flex flex-col gap-2">
+					<div className="px-4 py-5 flex flex-col gap-1">
 						{navItems.map((it) => (
 							<Link
 								key={it.href}
 								href={it.href}
 								onClick={() => setMobileOpen(false)}
-								className="rounded-lg border border-transparent px-3 py-3 text-sm tracking-wide uppercase text-foreground/90 hover:border-default hover:bg-secondary/60 transition"
+								className="rounded-xl px-4 py-3 font-body text-sm text-muted-foreground hover:text-primary hover:bg-accent/60 transition-colors duration-150"
 							>
 								{it.label}
 							</Link>
 						))}
 
 						{!isLoggedIn && (
-							<Button asChild className="mt-2">
+							<Button asChild className="mt-3">
 								<Link href="/#contact" onClick={() => setMobileOpen(false)}>
 									{t("getStarted")}
 								</Link>
 							</Button>
 						)}
 
-						<div className="mt-4 flex items-center gap-3">
+						<div className="mt-4 flex items-center gap-3 px-1">
 							<ThemeSwitch />
 							<LanguageSwitch />
 						</div>

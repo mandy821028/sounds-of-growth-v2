@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/session-provider";
 import { cookies } from "next/headers";
@@ -7,14 +7,19 @@ import { NextIntlClientProvider } from "next-intl";
 import { DEFAULT_LOCALE, AppLocale, normalizeLocale } from "@/i18n/config";
 import { ToastProvider } from "@/components/ui/toast-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-heading-var",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-body-var",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,7 +44,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning className={theme === "light" ? "theme-light" : "theme-dark"}>
       <body suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${cormorant.variable} ${dmSans.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>

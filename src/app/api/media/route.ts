@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { requireRole, isAuthError } from "@/lib/auth";
 
 const assetsDir = path.join(process.cwd(), "public", "assets");
 const ensureDir = async () => {
@@ -10,7 +11,9 @@ const ensureDir = async () => {
 };
 const isSafeName = (name: string) => !name.includes("..") && !name.includes("/") && !name.includes("\\");
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireRole("SUPER_ADMIN");
+  if (isAuthError(auth)) return auth;
   await ensureDir();
   const entries = await fs.readdir(assetsDir, { withFileTypes: true });
   const files = await Promise.all(
@@ -32,6 +35,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireRole("SUPER_ADMIN");
+  if (isAuthError(auth)) return auth;
   await ensureDir();
   const form = await req.formData().catch(() => null);
   if (!form) return NextResponse.json({ error: "Invalid form data" }, { status: 400 });

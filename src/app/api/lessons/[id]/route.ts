@@ -100,7 +100,8 @@ export async function DELETE(_req: Request, { params }: Promise<{ params: { id: 
   } else if (sUser?.role !== "SUPER_ADMIN") {
     return new NextResponse("Forbidden", { status: 403 });
   }
-  // delete dependents first
+  // With onDelete: Cascade on schema, these are belt-and-suspenders for safety
+  await prisma.lessonResource.deleteMany({ where: { lessonId: id } });
   await prisma.lessonCancellationRequest.deleteMany({ where: { lessonId: id } });
   await prisma.lessonException.deleteMany({ where: { lessonId: id } });
   await prisma.lesson.delete({ where: { id } });

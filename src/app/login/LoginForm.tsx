@@ -81,34 +81,72 @@ export default function LoginForm() {
 	}, [email, password, router]);
 
 	return (
-		<div className="max-w-md mx-auto py-16">
-			<img
-				src="/logo_animated.svg"
-				alt="Sounds of Growth"
-				className="mx-auto mb-6 h-40 w-auto"
-			/>
-			<h1 className="text-2xl font-semibold mb-4 text-center">{t("title")}</h1>
-			<div className="space-y-4" onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}>
-				<Input
-					type="email"
-					placeholder={t("email")}
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
-					className="bg-white border-gray-300"
-				/>
-				<Input
-					type="password"
-					placeholder={t("password")}
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-					className="bg-white border-gray-300"
-				/>
-				<Button type="button" onClick={handleSubmit} className="w-full text-white bg-teal-600 hover:bg-teal-700" disabled={isLoading}>
-					{isLoading ? (<span className="inline-flex items-center gap-2"><Spinner /> {tCommon("loading")}</span>) : t("submit")}
-				</Button>
+		<div className="min-h-screen flex items-center justify-center px-4 py-16 bg-background">
+			<div className="w-full max-w-sm">
+				{/* Logo + brand */}
+				<div className="text-center mb-8">
+					<img
+						src="/logo_animated.svg"
+						alt="Sounds of Growth"
+						className="mx-auto mb-4 h-28 w-auto"
+					/>
+					<h1 className="font-heading text-3xl font-light text-foreground tracking-tight">
+						{t("title")}
+					</h1>
+					<p className="mt-1 font-body text-sm text-muted-foreground">
+						Sounds of Growth
+					</p>
+				</div>
+
+				{/* Card */}
+				<div className="playful-card px-7 py-8">
+					<div
+						className="space-y-4"
+						onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+					>
+						<div className="space-y-1.5">
+							<label className="font-body text-sm font-medium text-foreground">
+								{t("email")}
+							</label>
+							<Input
+								type="email"
+								placeholder="you@example.com"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								autoComplete="email"
+							/>
+						</div>
+
+						<div className="space-y-1.5">
+							<label className="font-body text-sm font-medium text-foreground">
+								{t("password")}
+							</label>
+							<Input
+								type="password"
+								placeholder="••••••••"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								autoComplete="current-password"
+							/>
+						</div>
+
+						{error && (
+							<p className="font-body text-sm text-destructive">{error}</p>
+						)}
+
+						<Button
+							type="button"
+							onClick={handleSubmit}
+							className="w-full mt-2"
+							disabled={isLoading}
+						>
+							{isLoading
+								? (<span className="inline-flex items-center gap-2"><Spinner /> {tCommon("loading")}</span>)
+								: t("submit")}
+						</Button>
+					</div>
+				</div>
 			</div>
-			{error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-			{/* Magic link (email) flow removed for clarity; can be re-enabled when SMTP is configured */}
 		</div>
 	);
 }
