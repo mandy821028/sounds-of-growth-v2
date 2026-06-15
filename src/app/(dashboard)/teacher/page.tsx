@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth-config";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import ResendInviteButton from "@/components/ResendInviteButton";
 
 type SessionUser = { id: string; role: "SUPER_ADMIN" | "TEACHER" | "STUDENT"; locale: string };
 
@@ -29,18 +30,21 @@ export default async function TeacherPage() {
 				<Link className="border border-default px-3 py-2 rounded bg-card hover:bg-primary/10" href="/teacher/students/new">{t.new}</Link>
 				<Link className="border border-default px-3 py-2 rounded bg-card hover:bg-primary/10" href="/teacher/map">{locale === "es" ? "Ver mapa" : "View map"}</Link>
 			</div>
-			<ul className="space-y-2">
-				{students.map((s: StudentWithUser) => (
-					<li key={s.id} className="border border-default rounded p-3 bg-card">
-						<div className="font-medium flex items-center gap-2">
-							<img src={s.user.image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
-							<span>{s.user.firstName} {s.user.lastName}</span>
-							<a className="ml-2 text-sm underline" href={`/teacher/students/${s.id}/edit`}>{locale === 'es' ? 'Editar' : 'Edit'}</a>
-						</div>
-						<div className="text-sm text-gray-600">{s.user.email} · {new Date(s.dateOfBirth).toLocaleDateString()}</div>
-					</li>
-				))}
-			</ul>
+		<ul className="space-y-2">
+			{students.map((s: StudentWithUser) => (
+				<li key={s.id} className="border border-default rounded p-3 bg-card">
+					<div className="font-medium flex items-center gap-2 flex-wrap">
+						<img src={s.user.image ?? "/avatar-placeholder.svg"} alt="avatar" className="w-7 h-7 rounded-full border object-cover" />
+						<span>{s.user.firstName} {s.user.lastName}</span>
+						<a className="ml-2 text-sm underline" href={`/teacher/students/${s.id}/edit`}>{locale === 'es' ? 'Editar' : 'Edit'}</a>
+					</div>
+					<div className="text-sm text-gray-600 mt-1">{s.user.email} · {new Date(s.dateOfBirth).toLocaleDateString()}</div>
+					<div className="mt-2">
+						<ResendInviteButton studentId={s.id} email={s.user.email} />
+					</div>
+				</li>
+			))}
+		</ul>
 		</div>
 	);
 }
