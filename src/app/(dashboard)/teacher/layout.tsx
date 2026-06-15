@@ -10,9 +10,9 @@ export default async function TeacherSectionLayout({ children }: { children: Rea
   const locale = cookieStore.get("locale")?.value === "es" ? "es" : "en";
   const t = {
     students: locale === "es" ? "Alumnos" : "Students",
-    empty: locale === "es" ? "" : "",
     lessons: locale === "es" ? "Clases individuales" : "Individual lessons",
     groups: locale === "es" ? "Clases grupales" : "Group lessons",
+    summerCamps: locale === "es" ? "Summer Camps ☀️" : "Summer Camps ☀️",
     calendar: locale === "es" ? "Calendario" : "Calendar",
     requests: locale === "es" ? "Solicitudes" : "Requests",
   };
@@ -34,6 +34,7 @@ export default async function TeacherSectionLayout({ children }: { children: Rea
             { label: t.lessons, href: "/teacher/lessons" },
             { label: t.requests, href: "/teacher/lessons/requests", badgeCount: pendingCount || 0 },
             { label: t.groups, href: "#", disabled: true },
+            { label: t.summerCamps, href: "/teacher/summer-camps" },
             { label: t.calendar, href: "/calendar" },
           ]}
         />

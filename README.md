@@ -59,6 +59,8 @@ npm run db:seed
 ## Desarrollo (multi terminal)
 Terminal A — servidor web:
 ```
+
+rm -rf .next && npm run dev
 npm run dev
 ```
 - URL: http://localhost:3000

@@ -93,6 +93,51 @@ export async function GET(req: Request) {
       }
     }
   }
+  // ── Summer Camp Sessions ────────────────────────────────────────────────────
+  let campSessions: any[] = [];
+
+  if (sUser?.role === "SUPER_ADMIN") {
+    campSessions = await prisma.campSession.findMany({
+      where: { startsAtUtc: { gte: start, lte: end } },
+      include: { camp: { include: { teacher: { include: { user: true } } } } },
+    });
+  } else if (sUser?.role === "TEACHER" && teacherId) {
+    campSessions = await prisma.campSession.findMany({
+      where: { startsAtUtc: { gte: start, lte: end }, camp: { teacherId } },
+      include: { camp: true },
+    });
+  } else if (sUser?.role === "STUDENT" && studentId) {
+    const enrollments = await prisma.campEnrollment.findMany({
+      where: { studentId, status: "ACTIVE" },
+      select: { campId: true },
+    });
+    const campIds = enrollments.map((e) => e.campId);
+    if (campIds.length > 0) {
+      campSessions = await prisma.campSession.findMany({
+        where: { startsAtUtc: { gte: start, lte: end }, campId: { in: campIds } },
+        include: { camp: true },
+      });
+    }
+  }
+
+  for (const s of campSessions) {
+    events.push({
+      id: s.campId,
+      sessionId: s.id,
+      type: "camp",
+      occurrence: s.startsAtUtc.toISOString(),
+      title: `☀️ ${s.camp.name}${s.title ? ` · ${s.title}` : ""}`,
+      startsAtUtc: s.startsAtUtc.toISOString(),
+      durationMin: s.durationMin,
+      published: s.camp.published,
+      status: s.camp.status,
+      cancelStatus: null,
+      personName: s.camp.name,
+      personImage: null,
+      campColor: "coral",
+    });
+  }
+
   events.sort((a, b) => new Date(a.startsAtUtc).getTime() - new Date(b.startsAtUtc).getTime());
   return NextResponse.json(events);
 }

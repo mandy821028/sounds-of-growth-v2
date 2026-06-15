@@ -33,13 +33,14 @@ model User {
 }
 
 model Teacher {
-  id        String    @id @default(cuid())
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String    @unique
-  students  Student[]
-  lessons   Lesson[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String       @id @default(cuid())
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String       @unique
+  students    Student[]
+  lessons     Lesson[]
+  summerCamps SummerCamp[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Student {
@@ -52,12 +53,11 @@ model Student {
   address        String?  @db.Text
   lat            Float?
   lng            Float?
-  lessons        Lesson[]
-  cancelRequests LessonCancellationRequest[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@index([teacherId])
+  lessons         Lesson[]
+  cancelRequests  LessonCancellationRequest[]
+  campEnrollments CampEnrollment[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model ClassType {
@@ -202,6 +202,93 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ─── Summer Camps ─────────────────────────────────────────────────────────────
+
+enum CampStatus {
+  DRAFT
+  PUBLISHED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  WITHDRAWN
+}
+
+model SummerCamp {
+  id          String       @id @default(cuid())
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  teacherId   String
+  name        String
+  description String?      @db.Text
+  ageMin      Int?
+  ageMax      Int?
+  focus       String?      // "Piano", "Voice", "General Music", etc.
+  startDate   DateTime     // UTC start of first session
+  endDate     DateTime     // UTC end of last session
+  capacity    Int          @default(10)
+  priceUsd    Float        @default(0)
+  address     String?      @db.Text
+  lat         Float?
+  lng         Float?
+  published   Boolean      @default(false)
+  status      CampStatus   @default(DRAFT)
+  locale      String       @default("en")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  sessions    CampSession[]
+  enrollments CampEnrollment[]
+
+  @@index([teacherId, startDate])
+  @@index([published, startDate])
+}
+
+model CampSession {
+  id          String     @id @default(cuid())
+  camp        SummerCamp @relation(fields: [campId], references: [id], onDelete: Cascade)
+  campId      String
+  title       String?
+  startsAtUtc DateTime
+  durationMin Int        @default(60)
+  timezone    String     @default("America/Chicago")
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  resources   CampSessionResource[]
+
+  @@index([campId, startsAtUtc])
+}
+
+model CampSessionResource {
+  id          String      @id @default(cuid())
+  session     CampSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId   String
+  title       String
+  contentHtml String      @db.LongText
+  links       Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model CampEnrollment {
+  id         String           @id @default(cuid())
+  camp       SummerCamp       @relation(fields: [campId], references: [id], onDelete: Cascade)
+  campId     String
+  student    Student          @relation(fields: [studentId], references: [id])
+  studentId  String
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([campId, studentId])
+  @@index([studentId])
+  @@index([campId])
 }
 
 // --- Marketing / Homepage PageBuilder ---

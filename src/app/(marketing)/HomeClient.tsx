@@ -71,9 +71,15 @@ export default function HomeClient({
     <div>
       {Array.isArray(sliderItems) && sliderItems.length > 0 && <HomeSlider items={sliderItems} config={sliderConfig} />}
       <div className="max-w-5xl mx-auto px-4 pt-4">
-        <div className="inline-flex rounded-full border border-default bg-secondary p-1">
+        <div className="inline-flex rounded-full border border-border/60 bg-muted p-1 gap-0.5">
           {AUDIENCES.map((a) => (
-            <button key={a} className={`px-3 py-1 text-sm rounded-full ${aud===a?'bg-primary text-black':'text-muted'}`} onClick={()=>setAud(a)}>{a}</button>
+            <button
+              key={a}
+              className={`px-3 py-1 text-sm font-body rounded-full transition-all duration-150 ${aud===a ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
+              onClick={()=>setAud(a)}
+            >
+              {a}
+            </button>
           ))}
         </div>
       </div>

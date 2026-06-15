@@ -31,24 +31,24 @@ export default function ThemeSwitch() {
 
 	return (
 		<div className="inline-flex items-center" role="group" aria-label={t("theme")}>
-			<div className="inline-flex items-center rounded-full border border-default bg-secondary p-1">
-				<button
-					type="button"
-					className={cn("px-3 py-1 text-sm rounded-full transition", theme==="dark" ? "bg-primary text-black" : "text-muted")}
-					onClick={() => setCookie("dark")}
-					aria-pressed={theme==="dark"}
-				>
-					{t("dark")}
-				</button>
-				<button
-					type="button"
-					className={cn("px-3 py-1 text-sm rounded-full transition", theme==="light" ? "bg-primary text-black" : "text-muted")}
-					onClick={() => setCookie("light")}
-					aria-pressed={theme==="light"}
-				>
-					{t("light")}
-				</button>
-			</div>
+		<div className="inline-flex items-center rounded-full border border-border/60 bg-muted p-1 gap-0.5">
+			<button
+				type="button"
+				className={cn("px-3 py-1 text-sm font-body rounded-full transition-all duration-150", theme==="dark" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/60 hover:text-foreground")}
+				onClick={() => setCookie("dark")}
+				aria-pressed={theme==="dark"}
+			>
+				{t("dark")}
+			</button>
+			<button
+				type="button"
+				className={cn("px-3 py-1 text-sm font-body rounded-full transition-all duration-150", theme==="light" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/60 hover:text-foreground")}
+				onClick={() => setCookie("light")}
+				aria-pressed={theme==="light"}
+			>
+				{t("light")}
+			</button>
+		</div>
 		</div>
 	);
 }

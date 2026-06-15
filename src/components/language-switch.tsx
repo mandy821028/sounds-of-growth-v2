@@ -25,24 +25,24 @@ export default function LanguageSwitch() {
 
 	return (
 		<div className="inline-flex items-center" role="group" aria-label={t("language")}>
-			<div className="inline-flex items-center rounded-full border border-default bg-secondary p-1">
-				<button
-					type="button"
-					className={cn("px-3 py-1 text-sm rounded-full transition", locale==="es" ? "bg-primary text-black" : "text-muted")}
-					onClick={() => setCookie("es")}
-					aria-pressed={locale==="es"}
-				>
-					ES
-				</button>
-				<button
-					type="button"
-					className={cn("px-3 py-1 text-sm rounded-full transition", locale==="en" ? "bg-primary text-black" : "text-muted")}
-					onClick={() => setCookie("en")}
-					aria-pressed={locale==="en"}
-				>
-					EN
-				</button>
-			</div>
+		<div className="inline-flex items-center rounded-full border border-border/60 bg-muted p-1 gap-0.5">
+			<button
+				type="button"
+				className={cn("px-3 py-1 text-sm font-body rounded-full transition-all duration-150", locale==="es" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/60 hover:text-foreground")}
+				onClick={() => setCookie("es")}
+				aria-pressed={locale==="es"}
+			>
+				ES
+			</button>
+			<button
+				type="button"
+				className={cn("px-3 py-1 text-sm font-body rounded-full transition-all duration-150", locale==="en" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/60 hover:text-foreground")}
+				onClick={() => setCookie("en")}
+				aria-pressed={locale==="en"}
+			>
+				EN
+			</button>
+		</div>
 		</div>
 	);
 }

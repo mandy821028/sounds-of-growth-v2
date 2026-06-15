@@ -12,6 +12,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
             { label: tCommon("home"), href: "/student" },
             { label: tCommon("calendar"), href: "/calendar" },
             { label: tStudent("title"), href: "/student/lessons" },
+            { label: "Summer Camps ☀️", href: "/student/summer-camps" },
           ]}
         />
       </aside>
